@@ -1,0 +1,47 @@
+{
+  "name": "kaffee-produktivitaets-tracker",
+  "version": "1.0.0",
+  "description": "Produktivitäts-Tracker mit Kaffeetassen-Timer und Kanban-Board",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64",
+    "build:dir": "electron-builder --win --x64 --dir"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mas0n1x/ProductivityTracker.git"
+  },
+  "keywords": ["productivity", "timer", "kanban", "todo"],
+  "author": "Mas0n1x",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mas0n1x/ProductivityTracker/issues"
+  },
+  "homepage": "https://github.com/Mas0n1x/ProductivityTracker#readme",
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.mas0n1x.kaffee-tracker",
+    "productName": "Kaffee Produktivitaets-Tracker",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!node_modules/.cache/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "signAndEditExecutable": false
+    }
+  }
+}
