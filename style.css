@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
     min-height: 100vh;
     padding: 20px;
 }
@@ -18,10 +18,10 @@ body {
 
 h1 {
     text-align: center;
-    color: white;
+    color: #e8e8e8;
     margin-bottom: 30px;
     font-size: 2.5rem;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .main-content {
@@ -36,10 +36,11 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(30, 30, 45, 0.95);
     padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cup-container {
@@ -61,7 +62,7 @@ h1 {
 .steam span {
     width: 8px;
     height: 30px;
-    background: linear-gradient(to top, rgba(200, 200, 200, 0.3), transparent);
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.2), transparent);
     border-radius: 50%;
     animation: steam 2s infinite;
     opacity: 0;
@@ -106,14 +107,14 @@ h1 {
 .cup-body {
     width: 140px;
     height: 160px;
-    background: linear-gradient(135deg, #ffffff 0%, #e8e8e8 100%);
+    background: linear-gradient(135deg, #3a3a4a 0%, #2a2a3a 100%);
     border-radius: 0 0 70px 70px;
     position: relative;
     overflow: hidden;
     box-shadow:
-        inset -10px -10px 20px rgba(0, 0, 0, 0.1),
-        5px 5px 15px rgba(0, 0, 0, 0.2);
-    border: 3px solid #d0d0d0;
+        inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+        5px 5px 15px rgba(0, 0, 0, 0.4);
+    border: 3px solid #4a4a5a;
 }
 
 .coffee-fill {
@@ -142,7 +143,7 @@ h1 {
 .cup-handle {
     width: 45px;
     height: 70px;
-    border: 12px solid #d0d0d0;
+    border: 12px solid #4a4a5a;
     border-left: none;
     border-radius: 0 35px 35px 0;
     margin-top: 30px;
@@ -154,18 +155,18 @@ h1 {
 .saucer {
     width: 180px;
     height: 20px;
-    background: linear-gradient(135deg, #ffffff 0%, #d0d0d0 100%);
+    background: linear-gradient(135deg, #4a4a5a 0%, #3a3a4a 100%);
     border-radius: 50%;
     margin-top: -5px;
     margin-left: -20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 /* Timer Anzeige */
 .timer-display {
     font-size: 3.5rem;
     font-weight: bold;
-    color: #333;
+    color: #e8e8e8;
     margin-bottom: 20px;
     font-family: 'Courier New', monospace;
 }
@@ -223,16 +224,17 @@ h1 {
 
 /* Todo Sektion */
 .todo-section {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(30, 30, 45, 0.95);
     padding: 30px;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     min-width: 350px;
     max-width: 400px;
 }
 
 .todo-section h2 {
-    color: #333;
+    color: #e8e8e8;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -246,18 +248,26 @@ h1 {
 .todo-input-container input[type="text"] {
     flex: 1;
     padding: 12px;
-    border: 2px solid #ddd;
+    border: 2px solid #3a3a4a;
     border-radius: 8px;
     font-size: 1rem;
+    background: #2a2a3a;
+    color: #e8e8e8;
 }
 
 .todo-input-container input[type="number"] {
     width: 70px;
     padding: 12px;
-    border: 2px solid #ddd;
+    border: 2px solid #3a3a4a;
     border-radius: 8px;
     font-size: 1rem;
     text-align: center;
+    background: #2a2a3a;
+    color: #e8e8e8;
+}
+
+.todo-input-container input::placeholder {
+    color: #888;
 }
 
 .todo-input-container input:focus {
@@ -284,11 +294,29 @@ h1 {
     overflow-y: auto;
 }
 
+.todo-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+    background: #2a2a3a;
+    border-radius: 4px;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+    background: #4a4a5a;
+    border-radius: 4px;
+}
+
+.todo-list::-webkit-scrollbar-thumb:hover {
+    background: #5a5a6a;
+}
+
 .todo-item {
     display: flex;
     align-items: center;
     padding: 15px;
-    background: #f8f9fa;
+    background: #2a2a3a;
     border-radius: 10px;
     margin-bottom: 10px;
     transition: all 0.3s ease;
@@ -297,23 +325,23 @@ h1 {
 }
 
 .todo-item:hover {
-    background: #e9ecef;
+    background: #3a3a4a;
 }
 
 .todo-item.selected {
     border-color: #667eea;
-    background: #f0f0ff;
+    background: #3a3a5a;
 }
 
 .todo-item.completed {
-    opacity: 0.6;
+    opacity: 0.5;
     text-decoration: line-through;
 }
 
 .todo-text {
     flex: 1;
     font-size: 1rem;
-    color: #333;
+    color: #e8e8e8;
 }
 
 .todo-time {
@@ -345,13 +373,13 @@ h1 {
 .stats {
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 2px solid #eee;
+    border-top: 2px solid #3a3a4a;
     display: flex;
     justify-content: space-between;
 }
 
 .stats p {
-    color: #666;
+    color: #aaa;
     font-size: 0.9rem;
 }
 
