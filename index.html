@@ -7,12 +7,57 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Kaffee Produktivitäts-Tracker</h1>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Kaffee Produktivitäts-Tracker</h1>
+            <div class="header-stats">
+                <span>Erledigt heute: <strong id="completedCount">0</strong></span>
+                <span>Gesamtzeit: <strong id="totalTime">0</strong> Min</span>
+            </div>
+        </header>
 
-        <div class="main-content">
-            <!-- Kaffeetasse -->
-            <div class="coffee-section">
+        <div class="main-layout">
+            <!-- Kanban Board -->
+            <div class="kanban-board">
+                <!-- Backlog Spalte -->
+                <div class="kanban-column" data-status="backlog">
+                    <div class="column-header">
+                        <h3>Backlog</h3>
+                        <span class="task-count" id="backlog-count">0</span>
+                    </div>
+                    <div class="column-content" id="backlog-tasks"></div>
+                    <div class="add-task-form">
+                        <input type="text" class="task-input" placeholder="Neue Aufgabe..." data-column="backlog">
+                        <input type="number" class="time-input" placeholder="Min" min="1" max="120" data-column="backlog">
+                        <button class="btn-add-task" data-column="backlog">+</button>
+                    </div>
+                </div>
+
+                <!-- In Arbeit Spalte -->
+                <div class="kanban-column" data-status="inprogress">
+                    <div class="column-header">
+                        <h3>In Arbeit</h3>
+                        <span class="task-count" id="inprogress-count">0</span>
+                    </div>
+                    <div class="column-content" id="inprogress-tasks"></div>
+                </div>
+
+                <!-- Erledigt Spalte -->
+                <div class="kanban-column" data-status="done">
+                    <div class="column-header">
+                        <h3>Erledigt</h3>
+                        <span class="task-count" id="done-count">0</span>
+                    </div>
+                    <div class="column-content" id="done-tasks"></div>
+                    <button class="btn-clear-done" id="clearDoneBtn">Erledigte löschen</button>
+                </div>
+            </div>
+
+            <!-- Timer Sektion -->
+            <div class="timer-section">
+                <div class="active-task" id="activeTask">
+                    <p class="no-task">Ziehe eine Aufgabe nach "In Arbeit"</p>
+                </div>
                 <div class="cup-container">
                     <div class="steam">
                         <span></span>
@@ -29,26 +74,40 @@
                 </div>
                 <div class="timer-display" id="timerDisplay">00:00</div>
                 <div class="timer-controls">
-                    <button id="startBtn" class="btn btn-start">Start</button>
+                    <button id="startBtn" class="btn btn-start" disabled>Start</button>
                     <button id="pauseBtn" class="btn btn-pause" disabled>Pause</button>
                     <button id="resetBtn" class="btn btn-reset">Reset</button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Todo Liste -->
-            <div class="todo-section">
-                <h2>Aufgaben</h2>
-                <div class="todo-input-container">
-                    <input type="text" id="todoInput" placeholder="Neue Aufgabe...">
-                    <input type="number" id="todoTime" placeholder="Min" min="1" max="120">
-                    <button id="addTodoBtn" class="btn btn-add">+</button>
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Aufgabe bearbeiten</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label>Titel</label>
+                <input type="text" id="modalTaskTitle" class="modal-input">
+                <label>Beschreibung</label>
+                <textarea id="modalTaskDesc" class="modal-textarea" placeholder="Beschreibung hinzufügen..."></textarea>
+                <label>Zeit (Minuten)</label>
+                <input type="number" id="modalTaskTime" class="modal-input" min="1" max="120">
+                <label>Labels</label>
+                <div class="label-picker" id="labelPicker">
+                    <span class="label-option" data-color="#f44336">Dringend</span>
+                    <span class="label-option" data-color="#ff9800">Medium</span>
+                    <span class="label-option" data-color="#4CAF50">Einfach</span>
+                    <span class="label-option" data-color="#2196F3">Feature</span>
+                    <span class="label-option" data-color="#9c27b0">Bug</span>
                 </div>
-                <ul class="todo-list" id="todoList"></ul>
-
-                <div class="stats">
-                    <p>Erledigt heute: <span id="completedCount">0</span></p>
-                    <p>Gesamtzeit: <span id="totalTime">0</span> Min</p>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-delete-task" id="deleteTaskBtn">Löschen</button>
+                <button class="btn btn-save" id="saveTaskBtn">Speichern</button>
             </div>
         </div>
     </div>
