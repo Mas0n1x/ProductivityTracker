@@ -1,0 +1,378 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.main-content {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Kaffeetasse Sektion */
+.coffee-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.cup-container {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+/* Dampf Animation */
+.steam {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 1;
+}
+
+.steam span {
+    width: 8px;
+    height: 30px;
+    background: linear-gradient(to top, rgba(200, 200, 200, 0.3), transparent);
+    border-radius: 50%;
+    animation: steam 2s infinite;
+    opacity: 0;
+}
+
+.steam span:nth-child(2) {
+    animation-delay: 0.4s;
+    height: 35px;
+}
+
+.steam span:nth-child(3) {
+    animation-delay: 0.8s;
+    height: 25px;
+}
+
+.steam.active span {
+    opacity: 1;
+}
+
+@keyframes steam {
+    0% {
+        transform: translateY(0) scaleX(1);
+        opacity: 0.4;
+    }
+    50% {
+        transform: translateY(-20px) scaleX(1.5);
+        opacity: 0.2;
+    }
+    100% {
+        transform: translateY(-40px) scaleX(2);
+        opacity: 0;
+    }
+}
+
+/* Kaffeetasse */
+.cup {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+}
+
+.cup-body {
+    width: 140px;
+    height: 160px;
+    background: linear-gradient(135deg, #ffffff 0%, #e8e8e8 100%);
+    border-radius: 0 0 70px 70px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        inset -10px -10px 20px rgba(0, 0, 0, 0.1),
+        5px 5px 15px rgba(0, 0, 0, 0.2);
+    border: 3px solid #d0d0d0;
+}
+
+.coffee-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(to bottom, #8B4513 0%, #5D3A1A 50%, #3E2712 100%);
+    transition: height 0.5s ease-out;
+    border-radius: 0 0 65px 65px;
+}
+
+.coffee-fill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 5%;
+    right: 5%;
+    height: 15px;
+    background: linear-gradient(to bottom, #D4A574 0%, #8B4513 100%);
+    border-radius: 50%;
+}
+
+/* Tassen Henkel */
+.cup-handle {
+    width: 45px;
+    height: 70px;
+    border: 12px solid #d0d0d0;
+    border-left: none;
+    border-radius: 0 35px 35px 0;
+    margin-top: 30px;
+    margin-left: -3px;
+    background: transparent;
+}
+
+/* Untertasse */
+.saucer {
+    width: 180px;
+    height: 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #d0d0d0 100%);
+    border-radius: 50%;
+    margin-top: -5px;
+    margin-left: -20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Timer Anzeige */
+.timer-display {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    font-family: 'Courier New', monospace;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 10px;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-start {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+}
+
+.btn-start:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-pause {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+}
+
+.btn-pause:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+
+.btn-reset {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    color: white;
+}
+
+.btn-reset:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+/* Todo Sektion */
+.todo-section {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    min-width: 350px;
+    max-width: 400px;
+}
+
+.todo-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.todo-input-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.todo-input-container input[type="text"] {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.todo-input-container input[type="number"] {
+    width: 70px;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.todo-input-container input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.btn-add {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 48px;
+    padding: 12px;
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Todo Liste */
+.todo-list {
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.todo-item:hover {
+    background: #e9ecef;
+}
+
+.todo-item.selected {
+    border-color: #667eea;
+    background: #f0f0ff;
+}
+
+.todo-item.completed {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+.todo-text {
+    flex: 1;
+    font-size: 1rem;
+    color: #333;
+}
+
+.todo-time {
+    background: #667eea;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 10px;
+}
+
+.todo-delete {
+    background: none;
+    border: none;
+    color: #f44336;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.todo-delete:hover {
+    opacity: 1;
+}
+
+/* Statistiken */
+.stats {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #eee;
+    display: flex;
+    justify-content: space-between;
+}
+
+.stats p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.stats span {
+    font-weight: bold;
+    color: #667eea;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .todo-section {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+}

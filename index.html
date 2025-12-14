@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaffee Produktivitäts-Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Kaffee Produktivitäts-Tracker</h1>
+
+        <div class="main-content">
+            <!-- Kaffeetasse -->
+            <div class="coffee-section">
+                <div class="cup-container">
+                    <div class="steam">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="cup">
+                        <div class="cup-body">
+                            <div class="coffee-fill" id="coffeeFill"></div>
+                        </div>
+                        <div class="cup-handle"></div>
+                    </div>
+                    <div class="saucer"></div>
+                </div>
+                <div class="timer-display" id="timerDisplay">00:00</div>
+                <div class="timer-controls">
+                    <button id="startBtn" class="btn btn-start">Start</button>
+                    <button id="pauseBtn" class="btn btn-pause" disabled>Pause</button>
+                    <button id="resetBtn" class="btn btn-reset">Reset</button>
+                </div>
+            </div>
+
+            <!-- Todo Liste -->
+            <div class="todo-section">
+                <h2>Aufgaben</h2>
+                <div class="todo-input-container">
+                    <input type="text" id="todoInput" placeholder="Neue Aufgabe...">
+                    <input type="number" id="todoTime" placeholder="Min" min="1" max="120">
+                    <button id="addTodoBtn" class="btn btn-add">+</button>
+                </div>
+                <ul class="todo-list" id="todoList"></ul>
+
+                <div class="stats">
+                    <p>Erledigt heute: <span id="completedCount">0</span></p>
+                    <p>Gesamtzeit: <span id="totalTime">0</span> Min</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
