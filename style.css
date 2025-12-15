@@ -1008,3 +1008,32 @@ body::before {
         height: 130px;
     }
 }
+
+/* Footer */
+.app-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-glass);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.footer-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(99, 102, 241, 0.3));
+    transition: all 0.3s ease;
+}
+
+.footer-logo:hover {
+    transform: scale(1.1) rotate(5deg);
+    filter: drop-shadow(0 4px 15px rgba(99, 102, 241, 0.5));
+}
