@@ -7,34 +7,37 @@
 }
 
 :root {
-    --bg-primary: #0a0a0f;
-    --bg-secondary: #12121a;
-    --bg-card: rgba(25, 25, 35, 0.8);
-    --bg-glass: rgba(255, 255, 255, 0.03);
-    --border-glass: rgba(255, 255, 255, 0.08);
-    --text-primary: #f0f0f5;
-    --text-secondary: #8888a0;
-    --accent-primary: #6366f1;
-    --accent-secondary: #8b5cf6;
-    --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+    --bg-primary: #0a0f0a;
+    --bg-secondary: #0d140d;
+    --bg-card: rgba(15, 25, 15, 0.85);
+    --bg-glass: rgba(20, 40, 20, 0.4);
+    --border-glass: rgba(34, 197, 94, 0.15);
+    --border-glow: rgba(34, 197, 94, 0.3);
+    --text-primary: #e8f5e8;
+    --text-secondary: #7cb87c;
+    --accent-primary: #22c55e;
+    --accent-secondary: #16a34a;
+    --accent-dark: #15803d;
+    --accent-gradient: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%);
+    --accent-glow: 0 0 30px rgba(34, 197, 94, 0.3);
     --success: #22c55e;
-    --warning: #f59e0b;
+    --warning: #eab308;
     --danger: #ef4444;
-    --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg-primary);
     background-image:
-        radial-gradient(ellipse at top left, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+        radial-gradient(ellipse at top left, rgba(34, 197, 94, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(22, 163, 74, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at center, rgba(21, 128, 61, 0.03) 0%, transparent 70%);
     min-height: 100vh;
     color: var(--text-primary);
     overflow-x: hidden;
 }
 
-/* Animated Background Particles */
+/* Animated Grid Background */
 body::before {
     content: '';
     position: fixed;
@@ -43,20 +46,43 @@ body::before {
     right: 0;
     bottom: 0;
     background-image:
-        radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.1), transparent),
-        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.05), transparent),
-        radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.08), transparent),
-        radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.06), transparent),
-        radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.1), transparent);
-    background-size: 200px 200px;
-    animation: particles 20s linear infinite;
+        linear-gradient(rgba(34, 197, 94, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 197, 94, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes gridMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+}
+
+/* Glowing Particles */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(2px 2px at 100px 50px, rgba(34, 197, 94, 0.4), transparent),
+        radial-gradient(2px 2px at 200px 150px, rgba(34, 197, 94, 0.3), transparent),
+        radial-gradient(1px 1px at 300px 250px, rgba(34, 197, 94, 0.5), transparent),
+        radial-gradient(2px 2px at 400px 100px, rgba(34, 197, 94, 0.2), transparent),
+        radial-gradient(1px 1px at 500px 300px, rgba(34, 197, 94, 0.4), transparent);
+    background-size: 550px 350px;
+    animation: particles 30s linear infinite;
     pointer-events: none;
     z-index: 0;
 }
 
 @keyframes particles {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-200px); }
+    0% { transform: translateY(0); opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { transform: translateY(-350px); opacity: 0.5; }
 }
 
 /* App Container */
@@ -73,7 +99,7 @@ body::before {
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    padding: 18px 35px;
+    padding: 15px 35px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -83,14 +109,34 @@ body::before {
     z-index: 100;
 }
 
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.5));
+    transition: all 0.3s ease;
+}
+
+.header-logo:hover {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.8));
+}
+
 .app-header h1 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: 600;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: -0.02em;
+    text-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
 }
 
 .header-stats {
@@ -110,6 +156,7 @@ body::before {
     color: var(--accent-primary);
     font-weight: 600;
     font-size: 1.1rem;
+    text-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
 }
 
 /* Main Layout */
@@ -147,21 +194,21 @@ body::before {
     background: var(--bg-glass);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-radius: 20px;
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
-    max-height: calc(100vh - 100px);
+    max-height: calc(100vh - 140px);
     border: 1px solid var(--border-glass);
     transition: all 0.3s ease;
 }
 
 .kanban-column:hover {
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: var(--shadow-glow);
+    border-color: var(--border-glow);
+    box-shadow: var(--accent-glow);
 }
 
 .column-header {
-    padding: 20px 24px;
+    padding: 18px 22px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -169,10 +216,10 @@ body::before {
 }
 
 .column-header h3 {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     color: var(--text-secondary);
 }
 
@@ -183,7 +230,7 @@ body::before {
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
-    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 2px 10px rgba(34, 197, 94, 0.4);
 }
 
 .column-content {
@@ -209,12 +256,12 @@ body::before {
 /* Task Cards */
 .task-card {
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 12px;
     cursor: grab;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid transparent;
+    border: 1px solid var(--border-glass);
     position: relative;
     overflow: hidden;
 }
@@ -225,18 +272,18 @@ body::before {
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 2px;
     background: var(--accent-gradient);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
 .task-card:hover {
-    transform: translateY(-4px) scale(1.02);
+    transform: translateY(-4px);
     box-shadow:
         0 10px 40px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(99, 102, 241, 0.1);
-    border-color: var(--border-glass);
+        0 0 20px rgba(34, 197, 94, 0.15);
+    border-color: var(--border-glow);
 }
 
 .task-card:hover::before {
@@ -246,14 +293,15 @@ body::before {
 .task-card.dragging {
     opacity: 0.6;
     cursor: grabbing;
-    transform: rotate(3deg) scale(1.05);
+    transform: rotate(2deg) scale(1.02);
 }
 
 .task-card.selected {
     border-color: var(--accent-primary);
     box-shadow:
-        0 0 0 3px rgba(99, 102, 241, 0.2),
-        0 10px 40px rgba(0, 0, 0, 0.3);
+        0 0 0 2px rgba(34, 197, 94, 0.3),
+        0 10px 40px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(34, 197, 94, 0.2);
 }
 
 .task-card.selected::before {
@@ -273,6 +321,7 @@ body::before {
     flex: 1;
     word-break: break-word;
     line-height: 1.4;
+    color: var(--text-primary);
 }
 
 .task-edit-btn {
@@ -284,7 +333,7 @@ body::before {
     font-size: 0.9rem;
     opacity: 0;
     transition: all 0.2s ease;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 .task-card:hover .task-edit-btn {
@@ -293,7 +342,7 @@ body::before {
 
 .task-edit-btn:hover {
     color: var(--accent-primary);
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(34, 197, 94, 0.1);
 }
 
 .task-description {
@@ -330,13 +379,13 @@ body::before {
 }
 
 .task-time {
-    background: rgba(99, 102, 241, 0.15);
+    background: rgba(34, 197, 94, 0.15);
     color: var(--accent-primary);
     padding: 6px 14px;
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.25);
 }
 
 /* Add Task Form */
@@ -351,7 +400,7 @@ body::before {
     flex: 1;
     padding: 12px 16px;
     border: 1px solid var(--border-glass);
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 0.85rem;
@@ -363,7 +412,7 @@ body::before {
     width: 65px;
     padding: 12px;
     border: 1px solid var(--border-glass);
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 0.85rem;
@@ -381,25 +430,25 @@ body::before {
 .time-input:focus {
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15), 0 0 20px rgba(34, 197, 94, 0.1);
 }
 
 .btn-add-task {
     padding: 12px 16px;
     background: var(--accent-gradient);
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     color: white;
     font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
 }
 
 .btn-add-task:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 25px rgba(34, 197, 94, 0.5);
 }
 
 .btn-add-task:active {
@@ -411,7 +460,7 @@ body::before {
     padding: 12px;
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 12px;
+    border-radius: 10px;
     color: var(--danger);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -426,9 +475,9 @@ body::before {
 
 /* Drop Zone Highlight */
 .column-content.drag-over {
-    background: rgba(99, 102, 241, 0.05);
-    border-radius: 12px;
-    border: 2px dashed rgba(99, 102, 241, 0.3);
+    background: rgba(34, 197, 94, 0.08);
+    border-radius: 10px;
+    border: 2px dashed rgba(34, 197, 94, 0.4);
 }
 
 /* Timer Section */
@@ -447,7 +496,7 @@ body::before {
 .active-task {
     width: 100%;
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 14px;
     padding: 20px;
     margin-bottom: 30px;
     text-align: center;
@@ -471,6 +520,7 @@ body::before {
     font-size: 1rem;
     margin-bottom: 6px;
     font-weight: 500;
+    color: var(--text-primary);
 }
 
 .active-task .task-info span {
@@ -479,14 +529,14 @@ body::before {
     font-weight: 500;
 }
 
-/* Coffee Cup - Realistic Design */
+/* Coffee Cup - Mas0n1x Green Style */
 .cup-container {
     position: relative;
     margin-bottom: 30px;
-    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
 }
 
-/* Steam Animation - Enhanced */
+/* Steam Animation - Green */
 .steam {
     position: absolute;
     top: -50px;
@@ -500,7 +550,7 @@ body::before {
 .steam span {
     width: 10px;
     height: 40px;
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.15), transparent);
+    background: linear-gradient(to top, rgba(34, 197, 94, 0.25), transparent);
     border-radius: 50%;
     animation: steam 2.5s ease-out infinite;
     opacity: 0;
@@ -527,7 +577,7 @@ body::before {
         opacity: 0;
     }
     15% {
-        opacity: 0.5;
+        opacity: 0.6;
     }
     50% {
         transform: translateY(-30px) scaleX(2) rotate(5deg);
@@ -539,7 +589,7 @@ body::before {
     }
 }
 
-/* Coffee Cup - 3D Realistic */
+/* Coffee Cup - Dark Green Style */
 .cup {
     position: relative;
     display: flex;
@@ -549,16 +599,16 @@ body::before {
 .cup-body {
     width: 130px;
     height: 150px;
-    background: linear-gradient(145deg, #4a4a5a 0%, #35353f 30%, #28282f 70%, #1f1f25 100%);
+    background: linear-gradient(145deg, #1a2e1a 0%, #152515 30%, #0f1a0f 70%, #0a120a 100%);
     border-radius: 8px 8px 65px 65px;
     position: relative;
     overflow: hidden;
     box-shadow:
-        inset 5px 0 15px rgba(255, 255, 255, 0.05),
-        inset -15px -15px 30px rgba(0, 0, 0, 0.4),
-        8px 8px 25px rgba(0, 0, 0, 0.5),
-        -3px -3px 10px rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+        inset 5px 0 15px rgba(34, 197, 94, 0.05),
+        inset -15px -15px 30px rgba(0, 0, 0, 0.5),
+        8px 8px 25px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
 /* Cup Inner Shadow (Rim) */
@@ -570,13 +620,13 @@ body::before {
     right: 5px;
     height: 15px;
     background: linear-gradient(to bottom,
-        rgba(0, 0, 0, 0.4) 0%,
+        rgba(0, 0, 0, 0.5) 0%,
         transparent 100%);
     border-radius: 50%;
     z-index: 5;
 }
 
-/* Cup Highlight */
+/* Cup Highlight - Green Glow */
 .cup-body::after {
     content: '';
     position: absolute;
@@ -585,7 +635,7 @@ body::before {
     width: 25px;
     height: 60px;
     background: linear-gradient(to bottom,
-        rgba(255, 255, 255, 0.08) 0%,
+        rgba(34, 197, 94, 0.1) 0%,
         transparent 100%);
     border-radius: 50%;
     z-index: 3;
@@ -598,16 +648,16 @@ body::before {
     right: 4px;
     height: 100%;
     background: linear-gradient(to bottom,
-        #8B5A2B 0%,
-        #6B4423 20%,
-        #5D3A1A 40%,
-        #4A2F15 60%,
-        #3E2712 100%);
+        #22c55e 0%,
+        #16a34a 20%,
+        #15803d 40%,
+        #166534 60%,
+        #14532d 100%);
     transition: height 0.5s ease-out;
     border-radius: 0 0 60px 60px;
 }
 
-/* Coffee Surface / Crema */
+/* Coffee Surface / Top */
 .coffee-fill::before {
     content: '';
     position: absolute;
@@ -616,13 +666,13 @@ body::before {
     right: 5%;
     height: 20px;
     background: linear-gradient(to bottom,
-        #D4A574 0%,
-        #C4956A 30%,
-        #8B5A2B 100%);
+        #4ade80 0%,
+        #22c55e 30%,
+        #16a34a 100%);
     border-radius: 50%;
     box-shadow:
         inset 0 -5px 15px rgba(0, 0, 0, 0.3),
-        0 2px 8px rgba(0, 0, 0, 0.2);
+        0 2px 8px rgba(34, 197, 94, 0.3);
 }
 
 /* Coffee Shine */
@@ -633,40 +683,43 @@ body::before {
     left: 15%;
     width: 30%;
     height: 10px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 50%;
     filter: blur(2px);
 }
 
-/* Cup Handle - 3D */
+/* Cup Handle - Green Accent */
 .cup-handle {
     width: 45px;
     height: 65px;
-    border: 14px solid #35353f;
+    border: 14px solid #152515;
     border-left: none;
     border-radius: 0 35px 35px 0;
     margin-top: 28px;
     margin-left: -4px;
     position: relative;
     box-shadow:
-        5px 5px 15px rgba(0, 0, 0, 0.4),
-        inset -3px -3px 8px rgba(0, 0, 0, 0.3),
-        inset 2px 2px 5px rgba(255, 255, 255, 0.03);
+        5px 5px 15px rgba(0, 0, 0, 0.5),
+        inset -3px -3px 8px rgba(0, 0, 0, 0.4),
+        inset 2px 2px 5px rgba(34, 197, 94, 0.05),
+        0 0 15px rgba(34, 197, 94, 0.1);
 }
 
-/* Saucer - 3D */
+/* Saucer - Green Accent */
 .saucer {
     width: 180px;
     height: 22px;
-    background: linear-gradient(145deg, #4a4a5a 0%, #35353f 50%, #28282f 100%);
+    background: linear-gradient(145deg, #1a2e1a 0%, #152515 50%, #0f1a0f 100%);
     border-radius: 50%;
     margin-top: -8px;
     margin-left: -25px;
     position: relative;
     box-shadow:
-        0 8px 25px rgba(0, 0, 0, 0.5),
-        inset 0 2px 5px rgba(255, 255, 255, 0.05),
-        inset 0 -3px 10px rgba(0, 0, 0, 0.3);
+        0 8px 25px rgba(0, 0, 0, 0.6),
+        inset 0 2px 5px rgba(34, 197, 94, 0.05),
+        inset 0 -3px 10px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.15);
 }
 
 .saucer::before {
@@ -676,7 +729,7 @@ body::before {
     left: 15%;
     right: 15%;
     height: 6px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 50%;
 }
 
@@ -688,7 +741,7 @@ body::before {
     margin-bottom: 25px;
     font-family: 'Inter', monospace;
     letter-spacing: -0.02em;
-    text-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+    text-shadow: 0 0 40px rgba(34, 197, 94, 0.4);
 }
 
 .timer-controls {
@@ -700,7 +753,7 @@ body::before {
 .btn {
     padding: 14px 24px;
     border: none;
-    border-radius: 14px;
+    border-radius: 12px;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
@@ -736,25 +789,25 @@ body::before {
 }
 
 .btn-start {
-    background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+    background: var(--accent-gradient);
     color: white;
-    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
 }
 
 .btn-start:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
 }
 
 .btn-pause {
-    background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    background: linear-gradient(135deg, var(--warning) 0%, #ca8a04 100%);
+    color: #1a1a1a;
+    box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3);
 }
 
 .btn-pause:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 8px 25px rgba(234, 179, 8, 0.4);
 }
 
 .btn-reset {
@@ -775,7 +828,7 @@ body::before {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: none;
@@ -796,12 +849,12 @@ body::before {
 
 .modal {
     background: var(--bg-secondary);
-    border-radius: 24px;
+    border-radius: 20px;
     width: 90%;
     max-width: 480px;
     box-shadow:
-        0 25px 80px rgba(0, 0, 0, 0.5),
-        0 0 60px rgba(99, 102, 241, 0.1);
+        0 25px 80px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(34, 197, 94, 0.1);
     border: 1px solid var(--border-glass);
     animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -828,6 +881,7 @@ body::before {
 .modal-header h3 {
     font-size: 1.15rem;
     font-weight: 600;
+    color: var(--text-primary);
 }
 
 .modal-close {
@@ -846,8 +900,8 @@ body::before {
 }
 
 .modal-close:hover {
-    color: var(--text-primary);
-    background: var(--bg-glass);
+    color: var(--accent-primary);
+    background: rgba(34, 197, 94, 0.1);
 }
 
 .modal-body {
@@ -874,7 +928,7 @@ body::before {
     width: 100%;
     padding: 14px 18px;
     border: 1px solid var(--border-glass);
-    border-radius: 14px;
+    border-radius: 12px;
     background: var(--bg-primary);
     color: var(--text-primary);
     font-size: 0.95rem;
@@ -892,7 +946,7 @@ body::before {
 .modal-textarea:focus {
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
 }
 
 .label-picker {
@@ -904,7 +958,7 @@ body::before {
 
 .label-option {
     padding: 8px 16px;
-    border-radius: 10px;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
@@ -952,12 +1006,41 @@ body::before {
 .btn-save {
     background: var(--accent-gradient);
     color: white;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
 }
 
 .btn-save:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+}
+
+/* Footer */
+.app-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 18px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-glass);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.footer-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.4));
+    transition: all 0.3s ease;
+}
+
+.footer-logo:hover {
+    transform: scale(1.15) rotate(5deg);
+    filter: drop-shadow(0 0 15px rgba(34, 197, 94, 0.7));
 }
 
 /* Responsive */
@@ -990,6 +1073,11 @@ body::before {
         padding: 15px 20px;
     }
 
+    .header-brand {
+        flex-direction: column;
+        gap: 10px;
+    }
+
     .header-stats {
         gap: 20px;
         font-size: 0.8rem;
@@ -1007,33 +1095,4 @@ body::before {
         width: 110px;
         height: 130px;
     }
-}
-
-/* Footer */
-.app-footer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 20px;
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border-glass);
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-}
-
-.footer-logo {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(99, 102, 241, 0.3));
-    transition: all 0.3s ease;
-}
-
-.footer-logo:hover {
-    transform: scale(1.1) rotate(5deg);
-    filter: drop-shadow(0 4px 15px rgba(99, 102, 241, 0.5));
 }

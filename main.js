@@ -1,8 +1,9 @@
 const electron = require('electron');
-const { app, BrowserWindow } = electron;
+const { app, BrowserWindow, Tray, Menu, nativeImage } = electron;
 const path = require('path');
 
 let mainWindow;
+let tray = null;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -14,8 +15,9 @@ function createWindow() {
             nodeIntegration: false,
             contextIsolation: true
         },
-        backgroundColor: '#1a1a2e',
-        show: false
+        backgroundColor: '#0a0f0a',
+        show: false,
+        icon: path.join(__dirname, 'logo.png')
     });
 
     mainWindow.loadFile('index.html');
@@ -28,21 +30,78 @@ function createWindow() {
     // Menüleiste ausblenden
     mainWindow.setMenuBarVisibility(false);
 
+    // Minimieren zum System Tray statt schließen
+    mainWindow.on('close', (event) => {
+        if (!app.isQuitting) {
+            event.preventDefault();
+            mainWindow.hide();
+        }
+        return false;
+    });
+
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
 }
 
-app.on('ready', createWindow);
+function createTray() {
+    const iconPath = path.join(__dirname, 'logo.png');
+    const trayIcon = nativeImage.createFromPath(iconPath);
+    tray = new Tray(trayIcon.resize({ width: 16, height: 16 }));
+
+    const contextMenu = Menu.buildFromTemplate([
+        {
+            label: 'Öffnen',
+            click: () => {
+                if (mainWindow) {
+                    mainWindow.show();
+                    mainWindow.focus();
+                }
+            }
+        },
+        {
+            type: 'separator'
+        },
+        {
+            label: 'Beenden',
+            click: () => {
+                app.isQuitting = true;
+                app.quit();
+            }
+        }
+    ]);
+
+    tray.setToolTip('Mas0n1x Produktivitäts-Tracker');
+    tray.setContextMenu(contextMenu);
+
+    // Doppelklick öffnet das Fenster
+    tray.on('double-click', () => {
+        if (mainWindow) {
+            mainWindow.show();
+            mainWindow.focus();
+        }
+    });
+}
+
+app.on('ready', () => {
+    createWindow();
+    createTray();
+});
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    // Nicht beenden wenn alle Fenster geschlossen
+    // App läuft im System Tray weiter
 });
 
 app.on('activate', () => {
     if (mainWindow === null) {
         createWindow();
+    } else {
+        mainWindow.show();
     }
+});
+
+// Vor dem Beenden aufräumen
+app.on('before-quit', () => {
+    app.isQuitting = true;
 });
