@@ -20,3 +20,4 @@ Thumbs.db
 # Cache
 .cache/
 *.cache
+nul
