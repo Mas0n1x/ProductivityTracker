@@ -733,12 +733,22 @@ body::after {
     border-radius: 50%;
 }
 
+/* Timer Label */
+.timer-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
 /* Timer Display */
 .timer-display {
-    font-size: 3.5rem;
+    font-size: 3.2rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     font-family: 'Inter', monospace;
     letter-spacing: -0.02em;
     text-shadow: 0 0 40px rgba(34, 197, 94, 0.4);
@@ -746,7 +756,101 @@ body::after {
 
 .timer-controls {
     display: flex;
-    gap: 12px;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+/* Stoppuhr Section */
+.stopwatch-section {
+    width: 100%;
+    padding-top: 25px;
+    border-top: 1px solid var(--border-glass);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stopwatch-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-primary);
+    margin-bottom: 8px;
+}
+
+.stopwatch-display {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-family: 'Inter', monospace;
+    letter-spacing: 0.02em;
+    padding: 12px 25px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+    min-width: 160px;
+    text-align: center;
+}
+
+.stopwatch-display.running {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+    }
+}
+
+.stopwatch-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-stopwatch-start {
+    background: var(--accent-gradient);
+    color: white;
+    padding: 10px 18px;
+    font-size: 0.8rem;
+    box-shadow: 0 3px 12px rgba(34, 197, 94, 0.3);
+}
+
+.btn-stopwatch-start:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(34, 197, 94, 0.4);
+}
+
+.btn-stopwatch-stop {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #1a1a1a;
+    padding: 10px 18px;
+    font-size: 0.8rem;
+    box-shadow: 0 3px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-stopwatch-stop:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(245, 158, 11, 0.4);
+}
+
+.btn-stopwatch-reset {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    padding: 10px 18px;
+    font-size: 0.8rem;
+}
+
+.btn-stopwatch-reset:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.25);
+    transform: translateY(-2px);
 }
 
 /* Buttons */

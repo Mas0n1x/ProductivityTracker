@@ -568,7 +568,97 @@ if ('Notification' in window && Notification.permission === 'default') {
 // Globale Funktion für Edit Button
 window.openEditModal = openEditModal;
 
+// ========================================
+// STOPPUHR FUNKTIONALITÄT
+// ========================================
+
+// Stoppuhr DOM Elemente
+const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+const stopwatchStartBtn = document.getElementById('stopwatchStartBtn');
+const stopwatchStopBtn = document.getElementById('stopwatchStopBtn');
+const stopwatchResetBtn = document.getElementById('stopwatchResetBtn');
+
+// Stoppuhr Variablen
+let stopwatchInterval = null;
+let stopwatchSeconds = 0;
+let isStopwatchRunning = false;
+
+// Stoppuhr Anzeige aktualisieren
+function updateStopwatchDisplay() {
+    const hours = Math.floor(stopwatchSeconds / 3600);
+    const minutes = Math.floor((stopwatchSeconds % 3600) / 60);
+    const seconds = stopwatchSeconds % 60;
+    stopwatchDisplay.textContent =
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+// Stoppuhr starten
+function startStopwatch() {
+    if (!activeTaskId) return;
+
+    isStopwatchRunning = true;
+    stopwatchStartBtn.disabled = true;
+    stopwatchStopBtn.disabled = false;
+    stopwatchDisplay.classList.add('running');
+
+    stopwatchInterval = setInterval(() => {
+        stopwatchSeconds++;
+        updateStopwatchDisplay();
+    }, 1000);
+}
+
+// Stoppuhr stoppen
+function stopStopwatch() {
+    isStopwatchRunning = false;
+    clearInterval(stopwatchInterval);
+    stopwatchStartBtn.disabled = !activeTaskId;
+    stopwatchStopBtn.disabled = true;
+    stopwatchDisplay.classList.remove('running');
+}
+
+// Stoppuhr zurücksetzen
+function resetStopwatch() {
+    stopStopwatch();
+    stopwatchSeconds = 0;
+    updateStopwatchDisplay();
+}
+
+// Stoppuhr aktivieren wenn Task aktiv wird
+function enableStopwatch() {
+    stopwatchStartBtn.disabled = false;
+    stopwatchResetBtn.disabled = false;
+}
+
+// Stoppuhr deaktivieren wenn keine Task aktiv
+function disableStopwatch() {
+    stopStopwatch();
+    stopwatchStartBtn.disabled = true;
+    stopwatchStopBtn.disabled = true;
+}
+
+// Originale setActiveTask Funktion erweitern
+const originalSetActiveTask = setActiveTask;
+setActiveTask = function(taskId) {
+    originalSetActiveTask(taskId);
+    resetStopwatch();
+    enableStopwatch();
+};
+
+// Originale resetActiveTask Funktion erweitern
+const originalResetActiveTask = resetActiveTask;
+resetActiveTask = function() {
+    originalResetActiveTask();
+    resetStopwatch();
+    disableStopwatch();
+};
+
+// Stoppuhr Event Listener
+stopwatchStartBtn.addEventListener('click', startStopwatch);
+stopwatchStopBtn.addEventListener('click', stopStopwatch);
+stopwatchResetBtn.addEventListener('click', resetStopwatch);
+
 // Initial laden
 loadData();
 updateTimerDisplay();
 updateCoffeeFill();
+updateStopwatchDisplay();
