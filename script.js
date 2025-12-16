@@ -1399,60 +1399,230 @@ stopwatchStopBtn.addEventListener('click', stopStopwatch);
 stopwatchResetBtn.addEventListener('click', resetStopwatch);
 
 // ========================================
-// NOTES PANEL FUNKTIONALITÄT
+// NOTES PANEL FUNKTIONALITÄT (Mehrere Notizen)
 // ========================================
 
 const notesToggle = document.getElementById('notesToggle');
 const notesPanel = document.getElementById('notesPanel');
 const notesClose = document.getElementById('notesClose');
-const globalNotes = document.getElementById('globalNotes');
-const notesSaved = document.getElementById('notesSaved');
-const exportNotesBtn = document.getElementById('exportNotes');
+const notesList = document.getElementById('notesList');
+const notesEditor = document.getElementById('notesEditor');
+const notesEmpty = document.getElementById('notesEmpty');
+const newNoteBtn = document.getElementById('newNoteBtn');
+const createFirstNote = document.getElementById('createFirstNote');
+const exportAllNotes = document.getElementById('exportAllNotes');
+const noteTitleInput = document.getElementById('noteTitleInput');
+const noteContent = document.getElementById('noteContent');
+const deleteNoteBtn = document.getElementById('deleteNoteBtn');
+const noteSavedIndicator = document.getElementById('noteSavedIndicator');
+const noteDate = document.getElementById('noteDate');
 
-let notesTimeout = null;
+let notes = [];
+let currentNoteId = null;
+let noteSaveTimeout = null;
 
-// Notes laden
+// Notizen laden
 function loadNotes() {
-    const savedNotes = localStorage.getItem('globalNotes');
+    const savedNotes = localStorage.getItem('userNotes');
     if (savedNotes) {
-        globalNotes.value = savedNotes;
+        notes = JSON.parse(savedNotes);
     }
+
+    // Migration: Alte globale Notiz übernehmen
+    const oldNotes = localStorage.getItem('globalNotes');
+    if (oldNotes && oldNotes.trim() && notes.length === 0) {
+        notes.push({
+            id: Date.now(),
+            title: 'Meine Notizen',
+            content: oldNotes,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        });
+        saveAllNotes();
+        localStorage.removeItem('globalNotes');
+    }
+
+    renderNotesList();
+    updateNotesUI();
 }
 
-// Notes speichern mit Debounce
-function saveNotes() {
-    clearTimeout(notesTimeout);
-    notesTimeout = setTimeout(() => {
-        localStorage.setItem('globalNotes', globalNotes.value);
-        notesSaved.classList.add('show');
-        setTimeout(() => notesSaved.classList.remove('show'), 2000);
+// Alle Notizen speichern
+function saveAllNotes() {
+    localStorage.setItem('userNotes', JSON.stringify(notes));
+}
+
+// Aktuelle Notiz speichern (Debounced)
+function saveCurrentNote() {
+    if (!currentNoteId) return;
+
+    clearTimeout(noteSaveTimeout);
+    noteSaveTimeout = setTimeout(() => {
+        const note = notes.find(n => n.id === currentNoteId);
+        if (note) {
+            note.title = noteTitleInput.value || 'Unbenannte Notiz';
+            note.content = noteContent.value;
+            note.updatedAt = new Date().toISOString();
+            saveAllNotes();
+            renderNotesList();
+
+            // Gespeichert-Indikator zeigen
+            noteSavedIndicator.classList.add('show');
+            setTimeout(() => noteSavedIndicator.classList.remove('show'), 2000);
+        }
     }, 500);
 }
 
-// Notes Panel Events
-notesToggle.addEventListener('click', () => {
-    notesPanel.classList.add('active');
-    statsPanel.classList.remove('active');
-    achievementsPanel.classList.remove('active');
-});
+// Neue Notiz erstellen
+function createNewNote() {
+    const newNote = {
+        id: Date.now(),
+        title: 'Neue Notiz',
+        content: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
 
-notesClose.addEventListener('click', () => {
-    notesPanel.classList.remove('active');
-});
+    notes.unshift(newNote);
+    saveAllNotes();
+    renderNotesList();
+    selectNote(newNote.id);
+    updateNotesUI();
 
-globalNotes.addEventListener('input', saveNotes);
+    // Titel-Input fokussieren
+    setTimeout(() => {
+        noteTitleInput.focus();
+        noteTitleInput.select();
+    }, 100);
+}
 
-// Notes exportieren
-exportNotesBtn.addEventListener('click', () => {
-    const text = globalNotes.value;
-    const blob = new Blob([text], { type: 'text/plain' });
+// Notiz auswählen
+function selectNote(noteId) {
+    currentNoteId = noteId;
+    const note = notes.find(n => n.id === noteId);
+
+    if (note) {
+        noteTitleInput.value = note.title;
+        noteContent.value = note.content;
+        noteDate.textContent = `Erstellt: ${formatDate(note.createdAt)}`;
+
+        // Aktive Markierung aktualisieren
+        document.querySelectorAll('.note-item').forEach(item => {
+            item.classList.toggle('active', parseInt(item.dataset.id) === noteId);
+        });
+
+        updateNotesUI();
+    }
+}
+
+// Notiz löschen
+function deleteCurrentNote() {
+    if (!currentNoteId) return;
+
+    const noteIndex = notes.findIndex(n => n.id === currentNoteId);
+    if (noteIndex !== -1) {
+        notes.splice(noteIndex, 1);
+        saveAllNotes();
+
+        currentNoteId = null;
+        noteTitleInput.value = '';
+        noteContent.value = '';
+
+        renderNotesList();
+        updateNotesUI();
+
+        // Erste Notiz auswählen wenn vorhanden
+        if (notes.length > 0) {
+            selectNote(notes[0].id);
+        }
+    }
+}
+
+// Notizen-Liste rendern
+function renderNotesList() {
+    notesList.innerHTML = notes.map(note => `
+        <div class="note-item ${note.id === currentNoteId ? 'active' : ''}"
+             data-id="${note.id}"
+             onclick="selectNote(${note.id})">
+            <div class="note-item-title">${note.title || 'Unbenannte Notiz'}</div>
+            <div class="note-item-preview">${note.content.substring(0, 50) || 'Keine Inhalte...'}</div>
+            <div class="note-item-date">${formatDate(note.updatedAt)}</div>
+        </div>
+    `).join('');
+}
+
+// UI-Status aktualisieren
+function updateNotesUI() {
+    const hasNotes = notes.length > 0;
+    const hasSelectedNote = currentNoteId !== null;
+
+    notesList.style.display = hasNotes ? 'flex' : 'none';
+    notesEditor.classList.toggle('active', hasSelectedNote);
+    notesEmpty.classList.toggle('active', !hasNotes);
+}
+
+// Datum formatieren
+function formatDate(isoString) {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+        return `Heute, ${date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (diffDays === 1) {
+        return `Gestern, ${date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`;
+    } else {
+        return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+}
+
+// Alle Notizen exportieren
+function exportAllNotesAsText() {
+    if (notes.length === 0) return;
+
+    let exportText = '=== Meine Notizen ===\n\n';
+    notes.forEach((note, index) => {
+        exportText += `--- ${note.title} ---\n`;
+        exportText += `Erstellt: ${new Date(note.createdAt).toLocaleString('de-DE')}\n`;
+        exportText += `Aktualisiert: ${new Date(note.updatedAt).toLocaleString('de-DE')}\n\n`;
+        exportText += note.content + '\n\n';
+        if (index < notes.length - 1) exportText += '─'.repeat(40) + '\n\n';
+    });
+
+    const blob = new Blob([exportText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `notizen_${new Date().toISOString().split('T')[0]}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+// Event Listeners
+notesToggle.addEventListener('click', () => {
+    notesPanel.classList.add('active');
+    statsPanel.classList.remove('active');
+    achievementsPanel.classList.remove('active');
+
+    // Erste Notiz auswählen wenn keine ausgewählt
+    if (notes.length > 0 && !currentNoteId) {
+        selectNote(notes[0].id);
+    }
 });
+
+notesClose.addEventListener('click', () => {
+    notesPanel.classList.remove('active');
+});
+
+newNoteBtn.addEventListener('click', createNewNote);
+createFirstNote.addEventListener('click', createNewNote);
+deleteNoteBtn.addEventListener('click', deleteCurrentNote);
+exportAllNotes.addEventListener('click', exportAllNotesAsText);
+
+noteTitleInput.addEventListener('input', saveCurrentNote);
+noteContent.addEventListener('input', saveCurrentNote);
+
+// Global verfügbar machen
+window.selectNote = selectNote;
 
 // ========================================
 // PRODUKTIVITÄTS-HEATMAP

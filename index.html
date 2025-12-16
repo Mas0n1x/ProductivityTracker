@@ -286,12 +286,28 @@
             <h3>📝 Notizen</h3>
             <button class="notes-close" id="notesClose">&times;</button>
         </div>
-        <div class="notes-content">
-            <textarea id="globalNotes" class="global-notes-textarea" placeholder="Deine Notizen hier..."></textarea>
+        <div class="notes-toolbar">
+            <button class="btn-new-note" id="newNoteBtn" title="Neue Notiz">+ Neue Notiz</button>
+            <button class="btn-export-all-notes" id="exportAllNotes" title="Alle exportieren">Export</button>
         </div>
-        <div class="notes-footer">
-            <span class="notes-saved" id="notesSaved">Gespeichert</span>
-            <button class="btn btn-export-notes" id="exportNotes">Export</button>
+        <div class="notes-list" id="notesList">
+            <!-- Notizen werden hier dynamisch eingefügt -->
+        </div>
+        <div class="notes-editor" id="notesEditor">
+            <div class="notes-editor-header">
+                <input type="text" class="note-title-input" id="noteTitleInput" placeholder="Titel der Notiz...">
+                <button class="btn-delete-note" id="deleteNoteBtn" title="Notiz löschen">🗑️</button>
+            </div>
+            <textarea id="noteContent" class="note-content-textarea" placeholder="Schreibe deine Notiz..."></textarea>
+            <div class="notes-editor-footer">
+                <span class="note-saved-indicator" id="noteSavedIndicator">Gespeichert</span>
+                <span class="note-date" id="noteDate"></span>
+            </div>
+        </div>
+        <div class="notes-empty" id="notesEmpty">
+            <span class="notes-empty-icon">📝</span>
+            <p>Keine Notizen vorhanden</p>
+            <button class="btn-create-first-note" id="createFirstNote">Erste Notiz erstellen</button>
         </div>
     </div>
 
