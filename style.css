@@ -2472,6 +2472,22 @@ body::before {
     color: var(--text-secondary);
 }
 
+.btn-export-note {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: var(--accent-primary);
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+}
+
+.btn-export-note:hover {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: var(--accent-primary);
+}
+
 .btn-delete-note {
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);

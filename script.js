@@ -1618,6 +1618,35 @@ createFirstNote.addEventListener('click', createNewNote);
 deleteNoteBtn.addEventListener('click', deleteCurrentNote);
 exportAllNotes.addEventListener('click', exportAllNotesAsText);
 
+// Einzelne Notiz exportieren
+const exportNoteBtn = document.getElementById('exportNoteBtn');
+
+function exportCurrentNote() {
+    if (!currentNoteId) return;
+
+    const note = notes.find(n => n.id === currentNoteId);
+    if (!note) return;
+
+    let exportText = `${note.title}\n`;
+    exportText += `${'='.repeat(note.title.length)}\n\n`;
+    exportText += `Erstellt: ${new Date(note.createdAt).toLocaleString('de-DE')}\n`;
+    exportText += `Aktualisiert: ${new Date(note.updatedAt).toLocaleString('de-DE')}\n\n`;
+    exportText += `${'-'.repeat(40)}\n\n`;
+    exportText += note.content;
+
+    const blob = new Blob([exportText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // Dateiname aus Titel generieren (Sonderzeichen entfernen)
+    const safeTitle = note.title.replace(/[^a-zA-Z0-9äöüÄÖÜß\s-]/g, '').replace(/\s+/g, '_');
+    a.download = `${safeTitle}_${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+exportNoteBtn.addEventListener('click', exportCurrentNote);
+
 noteTitleInput.addEventListener('input', saveCurrentNote);
 noteContent.addEventListener('input', saveCurrentNote);
 
