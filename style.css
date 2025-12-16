@@ -55,10 +55,12 @@ body::before {
 /* App Container */
 .app-container {
     min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     z-index: 1;
+    overflow: hidden;
 }
 
 /* Header */
@@ -131,15 +133,19 @@ body::before {
     display: flex;
     flex: 1;
     overflow: hidden;
+    min-height: 0;
+    max-height: calc(100vh - 130px);
 }
 
 /* Kanban Board */
 .kanban-board {
     flex: 1;
     display: flex;
-    gap: 24px;
-    padding: 24px;
+    gap: 20px;
+    padding: 20px;
     overflow-x: auto;
+    overflow-y: hidden;
+    min-height: 0;
 }
 
 .kanban-board::-webkit-scrollbar {
@@ -156,15 +162,16 @@ body::before {
 }
 
 .kanban-column {
-    min-width: 320px;
-    max-width: 360px;
+    min-width: 280px;
+    flex: 1 1 280px;
+    max-width: 380px;
     background: var(--bg-glass);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-radius: 16px;
     display: flex;
     flex-direction: column;
-    max-height: calc(100vh - 140px);
+    max-height: calc(100vh - 160px);
     border: 1px solid var(--border-glass);
     transition: all 0.3s ease;
 }
@@ -450,22 +457,26 @@ body::before {
 /* Timer Section */
 .timer-section {
     width: 340px;
+    min-width: 280px;
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    padding: 35px;
+    padding: 20px 15px;
     display: flex;
     flex-direction: column;
     align-items: center;
     border-left: 1px solid var(--border-glass);
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .active-task {
     width: 100%;
     background: var(--bg-card);
-    border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 30px;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
     text-align: center;
     min-height: 70px;
     display: flex;
@@ -499,8 +510,9 @@ body::before {
 /* Coffee Cup Container */
 .cup-container {
     position: relative;
-    margin-bottom: 35px;
+    margin-bottom: 20px;
     filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.8));
+    transform: scale(0.85);
 }
 
 /* Steam Animation */
@@ -757,10 +769,10 @@ body::before {
 
 /* Timer Display */
 .timer-display {
-    font-size: 3.2rem;
+    font-size: 2.8rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     font-family: 'Inter', monospace;
     letter-spacing: -0.02em;
     text-shadow: 0 0 40px rgba(34, 197, 94, 0.4);
@@ -768,14 +780,17 @@ body::before {
 
 .timer-controls {
     display: flex;
-    gap: 10px;
-    margin-bottom: 30px;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
 }
 
 /* Stoppuhr Section */
 .stopwatch-section {
     width: 100%;
-    padding-top: 25px;
+    padding-top: 15px;
     border-top: 1px solid var(--border-glass);
     display: flex;
     flex-direction: column;
@@ -792,17 +807,17 @@ body::before {
 }
 
 .stopwatch-display {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     font-family: 'Inter', monospace;
     letter-spacing: 0.02em;
-    padding: 12px 25px;
+    padding: 10px 20px;
     background: var(--bg-card);
     border-radius: 12px;
     border: 1px solid var(--border-glass);
-    min-width: 160px;
+    min-width: 140px;
     text-align: center;
 }
 
@@ -824,6 +839,8 @@ body::before {
 .stopwatch-controls {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .btn-stopwatch-start {
@@ -867,16 +884,17 @@ body::before {
 
 /* Buttons */
 .btn {
-    padding: 14px 24px;
+    padding: 12px 18px;
     border: none;
     border-radius: 12px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: inherit;
     position: relative;
     overflow: hidden;
+    white-space: nowrap;
 }
 
 .btn::before {
@@ -1135,19 +1153,20 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    padding: 18px;
+    gap: 10px;
+    padding: 10px;
     background: var(--bg-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--border-glass);
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
 }
 
 .footer-logo {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     border-radius: 4px;
     object-fit: contain;
     filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.4));
@@ -1414,30 +1433,28 @@ body::before {
    STATS PANEL
    ======================================== */
 
+.floating-buttons {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 99;
+}
+
 .stats-toggle,
 .achievements-toggle {
-    position: fixed;
-    width: 50px;
-    height: 50px;
+    position: relative;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: none;
     background: var(--bg-card);
     border: 1px solid var(--border-glass);
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    z-index: 99;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-}
-
-.stats-toggle {
-    right: 25px;
-    bottom: 90px;
-}
-
-.achievements-toggle {
-    right: 25px;
-    bottom: 150px;
 }
 
 .stats-toggle:hover,
@@ -1775,6 +1792,44 @@ body::before {
 }
 
 /* Responsive */
+
+/* Large screens - ensure proper layout */
+@media (min-width: 1280px) {
+    .kanban-column {
+        min-width: 320px;
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .timer-section {
+        width: 360px;
+    }
+}
+
+/* Medium-large screens */
+@media (max-width: 1279px) and (min-width: 1025px) {
+    .kanban-column {
+        min-width: 280px;
+        flex: 1;
+    }
+
+    .timer-section {
+        width: 320px;
+        padding: 20px 15px;
+    }
+
+    .cup-body {
+        width: 120px;
+        height: 140px;
+    }
+
+    .saucer {
+        width: 160px;
+        margin-left: -20px;
+    }
+}
+
+/* Tablet / Small Desktop */
 @media (max-width: 1024px) {
     .main-layout {
         flex-direction: column;
@@ -1784,38 +1839,182 @@ body::before {
         width: 100%;
         border-left: none;
         border-top: 1px solid var(--border-glass);
-        padding: 25px;
+        padding: 25px 20px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+    }
+
+    .active-task {
+        width: auto;
+        min-width: 250px;
+        max-width: 350px;
+        margin-bottom: 0;
+    }
+
+    .cup-container {
+        margin-bottom: 0;
+    }
+
+    .timer-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stopwatch-section {
+        width: auto;
+        min-width: 200px;
+        border-top: none;
+        border-left: 1px solid var(--border-glass);
+        padding-top: 0;
+        padding-left: 25px;
     }
 
     .kanban-board {
         padding: 16px;
+        min-height: 400px;
     }
 
     .kanban-column {
-        min-width: 290px;
+        min-width: 280px;
+        flex: 1 1 280px;
+        max-width: none;
+    }
+
+    .header-gamification {
+        gap: 15px;
+    }
+
+    .xp-bar-container {
+        width: 100px;
     }
 }
 
-@media (max-width: 600px) {
+/* Tablet Portrait */
+@media (max-width: 900px) {
     .app-header {
-        flex-direction: column;
+        padding: 12px 20px;
+        flex-wrap: wrap;
         gap: 12px;
-        text-align: center;
-        padding: 15px 20px;
     }
 
-    .header-brand {
-        flex-direction: column;
-        gap: 10px;
+    .header-brand h1 {
+        font-size: 1.1rem;
+    }
+
+    .header-gamification {
+        order: 3;
+        width: 100%;
+        justify-content: center;
     }
 
     .header-stats {
-        gap: 20px;
+        gap: 15px;
         font-size: 0.8rem;
     }
 
+    .daily-goal-section {
+        padding: 10px 20px;
+    }
+
+    .timer-section {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .stopwatch-section {
+        border-left: none;
+        border-top: 1px solid var(--border-glass);
+        padding-left: 0;
+        padding-top: 20px;
+        width: 100%;
+    }
+
     .kanban-column {
-        min-width: 270px;
+        min-width: 260px;
+    }
+}
+
+/* Mobile Landscape / Small Tablet */
+@media (max-width: 768px) {
+    .app-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        padding: 12px 15px;
+    }
+
+    .header-brand {
+        gap: 10px;
+    }
+
+    .header-brand h1 {
+        font-size: 1rem;
+    }
+
+    .header-gamification {
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .level-badge, .streak-badge {
+        padding: 6px 10px;
+    }
+
+    .xp-bar-container {
+        width: 90px;
+        height: 20px;
+    }
+
+    .header-stats {
+        gap: 12px;
+        font-size: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .kanban-board {
+        padding: 12px;
+        gap: 16px;
+    }
+
+    .kanban-column {
+        min-width: 240px;
+        max-height: calc(100vh - 280px);
+    }
+
+    .column-header {
+        padding: 14px 16px;
+    }
+
+    .column-header h3 {
+        font-size: 0.8rem;
+    }
+
+    .task-card {
+        padding: 12px;
+    }
+
+    .add-task-form {
+        padding: 12px;
+        flex-wrap: wrap;
+    }
+
+    .task-input {
+        flex: 1 1 100%;
+        margin-bottom: 8px;
+    }
+
+    .time-input {
+        width: 60px;
+    }
+
+    .category-select {
+        flex: 1;
+        min-width: 80px;
     }
 
     .timer-display {
@@ -1825,5 +2024,260 @@ body::before {
     .cup-body {
         width: 110px;
         height: 130px;
+    }
+
+    .saucer {
+        width: 150px;
+        margin-left: -20px;
+    }
+
+    .cup-handle {
+        width: 40px;
+        height: 55px;
+        border-width: 12px;
+        margin-top: 25px;
+    }
+
+    .stats-panel,
+    .achievements-panel {
+        width: 100%;
+        max-width: 350px;
+    }
+
+    .floating-buttons {
+        right: 15px;
+        bottom: 15px;
+        gap: 8px;
+    }
+
+    .stats-toggle,
+    .achievements-toggle {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* Mobile Portrait */
+@media (max-width: 600px) {
+    .app-header h1 {
+        font-size: 0.95rem;
+    }
+
+    .header-logo {
+        width: 32px;
+        height: 32px;
+    }
+
+    .level-badge, .streak-badge {
+        padding: 5px 8px;
+        font-size: 0.8rem;
+    }
+
+    .level-number, .streak-count {
+        font-size: 0.85rem;
+    }
+
+    .xp-bar-container {
+        width: 80px;
+        height: 18px;
+    }
+
+    .xp-text {
+        font-size: 0.6rem;
+    }
+
+    .daily-goal-section {
+        padding: 8px 15px;
+    }
+
+    .daily-goal-label {
+        font-size: 0.7rem;
+    }
+
+    .daily-goal-value {
+        font-size: 0.8rem;
+    }
+
+    .kanban-board {
+        padding: 10px;
+        gap: 12px;
+    }
+
+    .kanban-column {
+        min-width: 220px;
+        max-height: calc(100vh - 320px);
+    }
+
+    .column-header {
+        padding: 12px 14px;
+    }
+
+    .task-count {
+        padding: 3px 10px;
+        font-size: 0.7rem;
+    }
+
+    .task-card {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .task-title {
+        font-size: 0.9rem;
+    }
+
+    .task-time {
+        padding: 4px 10px;
+        font-size: 0.7rem;
+    }
+
+    .timer-section {
+        padding: 20px 15px;
+    }
+
+    .timer-display {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+
+    .timer-label {
+        font-size: 0.7rem;
+    }
+
+    .btn {
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
+
+    .cup-body {
+        width: 100px;
+        height: 120px;
+    }
+
+    .saucer {
+        width: 140px;
+        height: 20px;
+        margin-left: -20px;
+    }
+
+    .cup-handle {
+        width: 35px;
+        height: 50px;
+        border-width: 10px;
+        margin-top: 22px;
+    }
+
+    .cup-container {
+        margin-bottom: 25px;
+        transform: scale(0.9);
+    }
+
+    .steam span {
+        width: 6px;
+        height: 40px;
+    }
+
+    .steam span:nth-child(2) {
+        height: 50px;
+    }
+
+    .steam span:nth-child(3) {
+        height: 35px;
+    }
+
+    .stopwatch-display {
+        font-size: 1.6rem;
+        padding: 10px 20px;
+        min-width: 140px;
+    }
+
+    .stopwatch-label {
+        font-size: 0.7rem;
+    }
+
+    .btn-stopwatch-start,
+    .btn-stopwatch-stop,
+    .btn-stopwatch-reset {
+        padding: 8px 14px;
+        font-size: 0.75rem;
+    }
+
+    .modal {
+        width: 95%;
+        max-width: 400px;
+    }
+
+    .modal-header, .modal-body, .modal-footer {
+        padding: 16px 20px;
+    }
+
+    .app-footer {
+        padding: 12px;
+        font-size: 0.75rem;
+    }
+
+    .footer-logo {
+        width: 20px;
+        height: 20px;
+    }
+
+    .floating-buttons {
+        right: 12px;
+        bottom: 12px;
+        gap: 6px;
+    }
+
+    .stats-toggle,
+    .achievements-toggle {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 400px) {
+    .app-header {
+        padding: 10px;
+    }
+
+    .header-brand {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .app-header h1 {
+        font-size: 0.85rem;
+    }
+
+    .header-gamification {
+        gap: 8px;
+    }
+
+    .header-stats {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .kanban-column {
+        min-width: 200px;
+    }
+
+    .add-task-form {
+        gap: 6px;
+    }
+
+    .timer-display {
+        font-size: 2.2rem;
+    }
+
+    .timer-controls {
+        gap: 6px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.75rem;
     }
 }
