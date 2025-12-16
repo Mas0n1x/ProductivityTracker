@@ -187,9 +187,63 @@
 
     <!-- Floating Buttons -->
     <div class="floating-buttons">
+        <button class="focus-toggle" id="focusToggle" title="Fokus-Modus">🎯</button>
+        <button class="projects-toggle" id="projectsToggle" title="Projekte">📁</button>
         <button class="notes-toggle" id="notesToggle" title="Notizen">📝</button>
         <button class="achievements-toggle" id="achievementsToggle" title="Achievements">🏆</button>
         <button class="stats-toggle" id="statsToggle" title="Statistiken">📊</button>
+    </div>
+
+    <!-- Fokus-Modus Overlay -->
+    <div class="focus-mode-overlay" id="focusModeOverlay">
+        <div class="focus-mode-container">
+            <button class="focus-exit" id="focusExit" title="Fokus-Modus beenden">✕</button>
+            <div class="focus-task-info" id="focusTaskInfo">
+                <span class="focus-label">Aktuelle Aufgabe</span>
+                <h2 class="focus-task-title" id="focusTaskTitle">Keine Aufgabe ausgewählt</h2>
+                <span class="focus-task-category" id="focusTaskCategory"></span>
+            </div>
+            <div class="focus-timer-display" id="focusTimerDisplay">00:00</div>
+            <div class="focus-progress-ring">
+                <svg viewBox="0 0 200 200">
+                    <circle class="focus-progress-bg" cx="100" cy="100" r="90"/>
+                    <circle class="focus-progress-bar" id="focusProgressBar" cx="100" cy="100" r="90"/>
+                </svg>
+            </div>
+            <div class="focus-controls">
+                <button class="btn focus-btn" id="focusStartBtn">Start</button>
+                <button class="btn focus-btn" id="focusPauseBtn">Pause</button>
+                <button class="btn focus-btn focus-complete" id="focusCompleteBtn">Fertig</button>
+            </div>
+            <div class="focus-stopwatch">
+                <span class="focus-stopwatch-label">Tatsächliche Zeit</span>
+                <span class="focus-stopwatch-display" id="focusStopwatchDisplay">00:00:00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projekt-Zeiterfassung Panel -->
+    <div class="projects-panel" id="projectsPanel">
+        <div class="projects-header">
+            <h3>📁 Projekte</h3>
+            <button class="projects-close" id="projectsClose">&times;</button>
+        </div>
+        <div class="projects-content">
+            <div class="project-add">
+                <input type="text" id="newProjectName" placeholder="Neues Projekt..." class="project-input">
+                <input type="color" id="newProjectColor" value="#22c55e" class="project-color-picker">
+                <button class="btn btn-add-project" id="addProjectBtn">+</button>
+            </div>
+            <div class="projects-list" id="projectsList">
+                <!-- Dynamisch gefüllt -->
+            </div>
+            <div class="projects-summary">
+                <h4>Zeitübersicht</h4>
+                <div class="projects-chart" id="projectsChart">
+                    <!-- Dynamisch gefüllt -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Notes Panel -->
@@ -250,6 +304,11 @@
                     <option value="sport">💪 Sport</option>
                     <option value="projekt">🚀 Projekt</option>
                 </select>
+                <label>Projekt</label>
+                <select id="modalTaskProject" class="modal-select">
+                    <option value="">Kein Projekt</option>
+                    <!-- Dynamisch gefüllt -->
+                </select>
                 <label>Labels</label>
                 <div class="label-picker" id="labelPicker">
                     <span class="label-option" data-color="#f44336">Dringend</span>
@@ -257,6 +316,16 @@
                     <span class="label-option" data-color="#4CAF50">Einfach</span>
                     <span class="label-option" data-color="#2196F3">Feature</span>
                     <span class="label-option" data-color="#9c27b0">Bug</span>
+                </div>
+                <label>Subtasks</label>
+                <div class="subtasks-container" id="subtasksContainer">
+                    <div class="subtasks-list" id="subtasksList">
+                        <!-- Dynamisch gefüllt -->
+                    </div>
+                    <div class="subtask-add">
+                        <input type="text" id="newSubtaskInput" class="subtask-input" placeholder="Neuer Subtask...">
+                        <button class="btn btn-add-subtask" id="addSubtaskBtn">+</button>
+                    </div>
                 </div>
                 <label>Notizen</label>
                 <textarea id="modalTaskNotes" class="modal-textarea modal-notes" placeholder="Notizen, Links, Details..."></textarea>

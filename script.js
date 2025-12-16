@@ -51,6 +51,35 @@ const goalModalClose = document.getElementById('goalModalClose');
 const goalModalInput = document.getElementById('goalModalInput');
 const goalModalSave = document.getElementById('goalModalSave');
 
+// Fokus-Modus Elemente
+const focusToggle = document.getElementById('focusToggle');
+const focusModeOverlay = document.getElementById('focusModeOverlay');
+const focusExit = document.getElementById('focusExit');
+const focusTaskTitle = document.getElementById('focusTaskTitle');
+const focusTaskCategory = document.getElementById('focusTaskCategory');
+const focusTimerDisplay = document.getElementById('focusTimerDisplay');
+const focusProgressBar = document.getElementById('focusProgressBar');
+const focusStartBtn = document.getElementById('focusStartBtn');
+const focusPauseBtn = document.getElementById('focusPauseBtn');
+const focusCompleteBtn = document.getElementById('focusCompleteBtn');
+const focusStopwatchDisplay = document.getElementById('focusStopwatchDisplay');
+
+// Projekte Elemente
+const projectsToggle = document.getElementById('projectsToggle');
+const projectsPanel = document.getElementById('projectsPanel');
+const projectsClose = document.getElementById('projectsClose');
+const projectsList = document.getElementById('projectsList');
+const projectsChart = document.getElementById('projectsChart');
+const newProjectName = document.getElementById('newProjectName');
+const newProjectColor = document.getElementById('newProjectColor');
+const addProjectBtn = document.getElementById('addProjectBtn');
+const modalTaskProject = document.getElementById('modalTaskProject');
+
+// Subtasks Elemente
+const subtasksList = document.getElementById('subtasksList');
+const newSubtaskInput = document.getElementById('newSubtaskInput');
+const addSubtaskBtn = document.getElementById('addSubtaskBtn');
+
 // Kanban Spalten
 const columns = {
     backlog: document.getElementById('backlog-tasks'),
@@ -102,6 +131,20 @@ const categoryConfig = {
     'projekt': { icon: '🚀', name: 'Projekt' }
 };
 
+// Projekte Daten
+let projects = [];
+
+// Fokus-Modus Variablen
+let focusTimerInterval = null;
+let focusStopwatchInterval = null;
+let focusRemainingSeconds = 0;
+let focusTotalSeconds = 0;
+let focusStopwatchSeconds = 0;
+let isFocusRunning = false;
+
+// Temporäre Subtasks für Modal
+let currentSubtasks = [];
+
 // Achievements Definition
 const achievementsList = [
     { id: 'first_task', name: 'Erste Schritte', desc: 'Erste Aufgabe erledigt', icon: '🎯', condition: (data) => data.completedTasks.length >= 1 },
@@ -136,15 +179,25 @@ function loadData() {
     const savedStats = localStorage.getItem('productivityStats');
     const savedDate = localStorage.getItem('productivityDate');
     const savedPlayerData = localStorage.getItem('playerData');
+    const savedProjects = localStorage.getItem('projects');
 
     const today = new Date().toDateString();
 
     if (savedTasks) {
         tasks = JSON.parse(savedTasks);
+        // Migration: Subtasks hinzufügen falls nicht vorhanden
+        tasks.forEach(task => {
+            if (!task.subtasks) task.subtasks = [];
+            if (!task.projectId) task.projectId = null;
+        });
     }
 
     if (savedPlayerData) {
         playerData = { ...playerData, ...JSON.parse(savedPlayerData) };
+    }
+
+    if (savedProjects) {
+        projects = JSON.parse(savedProjects);
     }
 
     if (savedStats && savedDate === today) {
@@ -165,6 +218,8 @@ function loadData() {
     updateStats();
     updateGamificationUI();
     renderAchievements();
+    renderProjects();
+    updateProjectSelect();
 }
 
 // Player Data speichern
@@ -213,6 +268,8 @@ function createTask(title, time, status = 'backlog', category = '') {
         status: status,
         category: category,
         labels: [],
+        projectId: null,
+        subtasks: [],
         createdAt: new Date().toISOString(),
         completedAt: null
     };
@@ -232,6 +289,29 @@ function createTaskCardHTML(task) {
     const categoryHTML = task.category && categoryConfig[task.category]
         ? `<span class="task-category">${categoryConfig[task.category].icon} ${categoryConfig[task.category].name}</span>`
         : '';
+
+    // Projekt-Indikator
+    const project = task.projectId ? projects.find(p => p.id === task.projectId) : null;
+    const projectHTML = project
+        ? `<span class="task-project" style="border-left: 3px solid ${project.color}; padding-left: 6px;">${project.name}</span>`
+        : '';
+
+    // Subtasks-Indikator
+    let subtasksHTML = '';
+    if (task.subtasks && task.subtasks.length > 0) {
+        const completedSubtasks = task.subtasks.filter(s => s.completed).length;
+        const totalSubtasks = task.subtasks.length;
+        const progressPercent = (completedSubtasks / totalSubtasks) * 100;
+        subtasksHTML = `
+            <div class="task-subtasks-indicator">
+                <span class="subtask-icon">☑</span>
+                <div class="task-subtasks-bar">
+                    <div class="task-subtasks-bar-fill" style="width: ${progressPercent}%"></div>
+                </div>
+                <span>${completedSubtasks}/${totalSubtasks}</span>
+            </div>
+        `;
+    }
 
     // Zeit-Vergleich für erledigte Tasks
     let timeComparisonHTML = '';
@@ -256,6 +336,7 @@ function createTaskCardHTML(task) {
                 <button class="task-edit-btn" onclick="openEditModal(${task.id}, event)">✎</button>
             </div>
             ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
+            ${projectHTML}
             <div class="task-footer">
                 <div class="task-labels">
                     ${categoryHTML}
@@ -263,6 +344,7 @@ function createTaskCardHTML(task) {
                 </div>
                 <span class="task-time">${task.time} Min</span>
             </div>
+            ${subtasksHTML}
             ${timeComparisonHTML}
         </div>
     `;
@@ -928,6 +1010,15 @@ function openEditModal(taskId, event) {
     modalTaskCategory.value = task.category || '';
     modalTaskNotes.value = task.notes || '';
 
+    // Projekt setzen
+    if (modalTaskProject) {
+        modalTaskProject.value = task.projectId || '';
+    }
+
+    // Subtasks laden
+    currentSubtasks = task.subtasks ? [...task.subtasks] : [];
+    renderSubtasks();
+
     // Labels zurücksetzen und setzen
     document.querySelectorAll('.label-option').forEach(opt => {
         opt.classList.remove('selected');
@@ -955,6 +1046,14 @@ function saveTask() {
     task.time = parseInt(modalTaskTime.value) || task.time;
     task.category = modalTaskCategory.value;
     task.notes = modalTaskNotes.value.trim();
+
+    // Projekt speichern
+    if (modalTaskProject) {
+        task.projectId = modalTaskProject.value ? parseInt(modalTaskProject.value) : null;
+    }
+
+    // Subtasks speichern
+    task.subtasks = [...currentSubtasks];
 
     // Labels sammeln
     task.labels = [];
@@ -1687,6 +1786,352 @@ renderStatsPanel = function(tab = 'today') {
 // Globale Funktionen verfügbar machen
 window.exportAllData = exportAllData;
 window.importData = importData;
+
+// ========================================
+// PROJEKTE FUNKTIONALITÄT
+// ========================================
+
+function saveProjects() {
+    localStorage.setItem('projects', JSON.stringify(projects));
+}
+
+function renderProjects() {
+    if (!projectsList) return;
+
+    projectsList.innerHTML = projects.map(project => {
+        const totalTime = getProjectTime(project.id);
+        return `
+            <div class="project-item" data-id="${project.id}">
+                <div class="project-color-dot" style="background: ${project.color}"></div>
+                <div class="project-info">
+                    <div class="project-name">${project.name}</div>
+                    <div class="project-time">${totalTime} Minuten erfasst</div>
+                </div>
+                <button class="project-delete" onclick="deleteProject(${project.id})">✕</button>
+            </div>
+        `;
+    }).join('');
+
+    renderProjectsChart();
+}
+
+function getProjectTime(projectId) {
+    return tasks
+        .filter(t => t.projectId === projectId && t.status === 'done')
+        .reduce((sum, t) => sum + (t.actualTime || t.time), 0);
+}
+
+function renderProjectsChart() {
+    if (!projectsChart) return;
+
+    const maxTime = Math.max(...projects.map(p => getProjectTime(p.id)), 1);
+
+    projectsChart.innerHTML = projects.map(project => {
+        const time = getProjectTime(project.id);
+        const percent = (time / maxTime) * 100;
+        return `
+            <div class="project-bar">
+                <span class="project-bar-label">${project.name}</span>
+                <div class="project-bar-track">
+                    <div class="project-bar-fill" style="width: ${percent}%; background: ${project.color}"></div>
+                </div>
+                <span class="project-bar-value">${time}m</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function addProject() {
+    const name = newProjectName.value.trim();
+    const color = newProjectColor.value;
+
+    if (!name) return;
+
+    projects.push({
+        id: Date.now(),
+        name: name,
+        color: color
+    });
+
+    saveProjects();
+    renderProjects();
+    updateProjectSelect();
+    newProjectName.value = '';
+}
+
+function deleteProject(id) {
+    projects = projects.filter(p => p.id !== id);
+    // Projekt von Tasks entfernen
+    tasks.forEach(task => {
+        if (task.projectId === id) task.projectId = null;
+    });
+    saveTasks();
+    saveProjects();
+    renderProjects();
+    renderAllTasks();
+    updateProjectSelect();
+}
+
+function updateProjectSelect() {
+    if (!modalTaskProject) return;
+
+    modalTaskProject.innerHTML = '<option value="">Kein Projekt</option>' +
+        projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+// Projekte Panel Events
+projectsToggle.addEventListener('click', () => {
+    projectsPanel.classList.add('active');
+});
+
+projectsClose.addEventListener('click', () => {
+    projectsPanel.classList.remove('active');
+});
+
+addProjectBtn.addEventListener('click', addProject);
+
+newProjectName.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addProject();
+});
+
+// ========================================
+// SUBTASKS FUNKTIONALITÄT
+// ========================================
+
+function renderSubtasks() {
+    if (!subtasksList) return;
+
+    subtasksList.innerHTML = currentSubtasks.map((subtask, index) => `
+        <div class="subtask-item ${subtask.completed ? 'completed' : ''}" data-index="${index}">
+            <button class="subtask-checkbox ${subtask.completed ? 'checked' : ''}" onclick="toggleSubtask(${index})"></button>
+            <span class="subtask-text">${subtask.text}</span>
+            <button class="subtask-delete" onclick="deleteSubtask(${index})">✕</button>
+        </div>
+    `).join('');
+
+    // Progress Bar hinzufügen wenn Subtasks vorhanden
+    if (currentSubtasks.length > 0) {
+        const completed = currentSubtasks.filter(s => s.completed).length;
+        const total = currentSubtasks.length;
+        const percent = (completed / total) * 100;
+
+        subtasksList.innerHTML += `
+            <div class="subtask-progress">
+                <div class="subtask-progress-bar">
+                    <div class="subtask-progress-fill" style="width: ${percent}%"></div>
+                </div>
+                <span class="subtask-progress-text">${completed}/${total}</span>
+            </div>
+        `;
+    }
+}
+
+function addSubtask() {
+    const text = newSubtaskInput.value.trim();
+    if (!text) return;
+
+    currentSubtasks.push({
+        text: text,
+        completed: false
+    });
+
+    newSubtaskInput.value = '';
+    renderSubtasks();
+}
+
+function toggleSubtask(index) {
+    currentSubtasks[index].completed = !currentSubtasks[index].completed;
+    renderSubtasks();
+}
+
+function deleteSubtask(index) {
+    currentSubtasks.splice(index, 1);
+    renderSubtasks();
+}
+
+addSubtaskBtn.addEventListener('click', addSubtask);
+
+newSubtaskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') addSubtask();
+});
+
+// ========================================
+// FOKUS-MODUS FUNKTIONALITÄT
+// ========================================
+
+function enterFocusMode() {
+    const activeTask = tasks.find(t => t.id === activeTaskId);
+
+    if (!activeTask) {
+        // Kein Task aktiv, suche nach erstem "In Arbeit" Task
+        const inProgressTask = tasks.find(t => t.status === 'inprogress');
+        if (inProgressTask) {
+            activeTaskId = inProgressTask.id;
+        } else {
+            alert('Bitte ziehe zuerst eine Aufgabe nach "In Arbeit"');
+            return;
+        }
+    }
+
+    const task = tasks.find(t => t.id === activeTaskId);
+    if (!task) return;
+
+    // Fokus UI aktualisieren
+    focusTaskTitle.textContent = task.title;
+
+    const category = task.category && categoryConfig[task.category]
+        ? `${categoryConfig[task.category].icon} ${categoryConfig[task.category].name}`
+        : '';
+    focusTaskCategory.textContent = category;
+
+    // Timer setzen
+    focusTotalSeconds = task.time * 60;
+    focusRemainingSeconds = focusTotalSeconds;
+    focusStopwatchSeconds = 0;
+
+    updateFocusTimerDisplay();
+    updateFocusProgressRing();
+    updateFocusStopwatchDisplay();
+
+    focusModeOverlay.classList.add('active');
+}
+
+function exitFocusMode() {
+    stopFocusTimer();
+    stopFocusStopwatch();
+    focusModeOverlay.classList.remove('active');
+}
+
+function updateFocusTimerDisplay() {
+    const mins = Math.floor(focusRemainingSeconds / 60);
+    const secs = focusRemainingSeconds % 60;
+    focusTimerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function updateFocusProgressRing() {
+    const circumference = 2 * Math.PI * 90; // r=90
+    const progress = focusTotalSeconds > 0 ? (focusTotalSeconds - focusRemainingSeconds) / focusTotalSeconds : 0;
+    const offset = circumference - (progress * circumference);
+    focusProgressBar.style.strokeDashoffset = offset;
+}
+
+function updateFocusStopwatchDisplay() {
+    const hrs = Math.floor(focusStopwatchSeconds / 3600);
+    const mins = Math.floor((focusStopwatchSeconds % 3600) / 60);
+    const secs = focusStopwatchSeconds % 60;
+    focusStopwatchDisplay.textContent =
+        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+function startFocusTimer() {
+    if (isFocusRunning) return;
+
+    isFocusRunning = true;
+
+    focusTimerInterval = setInterval(() => {
+        if (focusRemainingSeconds > 0) {
+            focusRemainingSeconds--;
+            updateFocusTimerDisplay();
+            updateFocusProgressRing();
+        } else {
+            // Timer abgelaufen
+            clearInterval(focusTimerInterval);
+            focusTimerInterval = null;
+        }
+    }, 1000);
+
+    focusStopwatchInterval = setInterval(() => {
+        focusStopwatchSeconds++;
+        updateFocusStopwatchDisplay();
+    }, 1000);
+}
+
+function pauseFocusTimer() {
+    isFocusRunning = false;
+
+    if (focusTimerInterval) {
+        clearInterval(focusTimerInterval);
+        focusTimerInterval = null;
+    }
+    if (focusStopwatchInterval) {
+        clearInterval(focusStopwatchInterval);
+        focusStopwatchInterval = null;
+    }
+}
+
+function stopFocusTimer() {
+    pauseFocusTimer();
+    focusRemainingSeconds = 0;
+    focusStopwatchSeconds = 0;
+    isFocusRunning = false;
+}
+
+function stopFocusStopwatch() {
+    if (focusStopwatchInterval) {
+        clearInterval(focusStopwatchInterval);
+        focusStopwatchInterval = null;
+    }
+}
+
+function completeFocusTask() {
+    const task = tasks.find(t => t.id === activeTaskId);
+    if (!task) {
+        exitFocusMode();
+        return;
+    }
+
+    // Tatsächliche Zeit speichern
+    const actualMinutes = Math.ceil(focusStopwatchSeconds / 60);
+    task.actualTime = actualMinutes;
+    task.status = 'done';
+    task.completedAt = new Date().toISOString();
+
+    // Projekt-Zeit aktualisieren
+    if (task.projectId) {
+        // Zeit wird automatisch über getProjectTime berechnet
+    }
+
+    // Stats aktualisieren
+    completedToday++;
+    totalMinutes += actualMinutes;
+
+    // XP vergeben
+    awardXp(task);
+    updateStreak();
+    updateWeeklyStats(task);
+    checkAchievements();
+
+    saveTasks();
+    saveStats();
+    savePlayerData();
+
+    activeTaskId = null;
+
+    exitFocusMode();
+    renderAllTasks();
+    updateStats();
+    updateGamificationUI();
+    renderProjects();
+}
+
+// Fokus-Modus Events
+focusToggle.addEventListener('click', enterFocusMode);
+focusExit.addEventListener('click', exitFocusMode);
+focusStartBtn.addEventListener('click', startFocusTimer);
+focusPauseBtn.addEventListener('click', pauseFocusTimer);
+focusCompleteBtn.addEventListener('click', completeFocusTask);
+
+// ESC zum Beenden des Fokus-Modus
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && focusModeOverlay.classList.contains('active')) {
+        exitFocusMode();
+    }
+});
+
+// Globale Funktionen
+window.deleteProject = deleteProject;
+window.toggleSubtask = toggleSubtask;
+window.deleteSubtask = deleteSubtask;
 
 // Initial laden
 loadData();
