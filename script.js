@@ -63,6 +63,8 @@ const focusStartBtn = document.getElementById('focusStartBtn');
 const focusPauseBtn = document.getElementById('focusPauseBtn');
 const focusCompleteBtn = document.getElementById('focusCompleteBtn');
 const focusStopwatchDisplay = document.getElementById('focusStopwatchDisplay');
+const focusCoffeeFill = document.getElementById('focusCoffeeFill');
+const focusSteam = document.getElementById('focusSteam');
 
 // Projekte Elemente
 const projectsToggle = document.getElementById('projectsToggle');
@@ -887,6 +889,11 @@ function startTimer() {
     pauseBtn.disabled = false;
     steam.classList.add('active');
 
+    // Stoppuhr automatisch mit starten wenn sie noch nicht läuft
+    if (!isStopwatchRunning) {
+        startStopwatch();
+    }
+
     timerInterval = setInterval(() => {
         remainingSeconds--;
 
@@ -930,28 +937,55 @@ function resetTimer() {
     updateCoffeeFill();
 }
 
-// Timer abgeschlossen
+// Timer abgeschlossen (Countdown ist bei 0)
 function timerComplete() {
     isRunning = false;
     steam.classList.remove('active');
+    startBtn.disabled = true;
+    pauseBtn.disabled = true;
 
-    // Benachrichtigung
+    // Benachrichtigung - Timer ist fertig, aber Task noch nicht abgeschlossen
     if (Notification.permission === 'granted') {
-        new Notification('Aufgabe erledigt!', {
-            body: 'Dein Kaffee ist leer - Zeit für eine Pause!',
+        new Notification('Geschätzte Zeit abgelaufen!', {
+            body: 'Stoppe die Stoppuhr um die Aufgabe abzuschließen.',
             icon: '☕'
         });
     }
 
-    playCompletionSound();
+    // Hinweis-Sound abspielen (andere Töne als Completion)
+    playTimerEndSound();
 
-    // Task als erledigt markieren und verschieben
-    const task = tasks.find(t => t.id === activeTaskId);
-    if (task) {
-        task.status = 'done';
-        saveTasks();
+    // Timer auf 0 setzen und anzeigen
+    remainingSeconds = 0;
+    updateTimerDisplay();
+    updateCoffeeFill();
+
+    // Task wird NICHT automatisch abgeschlossen!
+    // Der Nutzer muss die Stoppuhr stoppen um die Task abzuschließen
+}
+
+// Sound für Timer-Ende (unterscheidet sich von Completion)
+function playTimerEndSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Zwei kurze Töne
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime + 0.15);
+
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (e) {
+        console.log('Audio nicht verfügbar');
     }
-    completeTask();
 }
 
 // Completion Sound
@@ -1257,18 +1291,53 @@ function startStopwatch() {
     }, 1000);
 }
 
-// Stoppuhr stoppen
+// Stoppuhr stoppen - schließt die Aufgabe ab!
 function stopStopwatch() {
+    if (!activeTaskId) {
+        // Keine aktive Task - nur Stoppuhr stoppen
+        isStopwatchRunning = false;
+        clearInterval(stopwatchInterval);
+        stopwatchStopBtn.disabled = true;
+        stopwatchDisplay.classList.remove('running');
+        return;
+    }
+
     isStopwatchRunning = false;
     clearInterval(stopwatchInterval);
-    stopwatchStartBtn.disabled = !activeTaskId;
-    stopwatchStopBtn.disabled = true;
     stopwatchDisplay.classList.remove('running');
+
+    // Timer auch stoppen falls er noch läuft
+    if (isRunning) {
+        pauseTimer();
+    }
+
+    // Task abschließen
+    const task = tasks.find(t => t.id === activeTaskId);
+    if (task) {
+        task.status = 'done';
+        saveTasks();
+    }
+
+    // Completion Sound und Notification
+    playCompletionSound();
+    if (Notification.permission === 'granted') {
+        new Notification('Aufgabe erledigt!', {
+            body: `Tatsächliche Zeit: ${Math.ceil(stopwatchSeconds / 60)} Minuten`,
+            icon: '☕'
+        });
+    }
+
+    // Task vollständig abschließen (Statistiken, XP etc.)
+    completeTask();
 }
 
-// Stoppuhr zurücksetzen
+// Stoppuhr zurücksetzen (ohne Task abzuschließen)
 function resetStopwatch() {
-    stopStopwatch();
+    // Stoppuhr nur stoppen ohne Task abzuschließen
+    isStopwatchRunning = false;
+    clearInterval(stopwatchInterval);
+    stopwatchStopBtn.disabled = true;
+    stopwatchDisplay.classList.remove('running');
     stopwatchSeconds = 0;
     updateStopwatchDisplay();
 }
@@ -1279,9 +1348,12 @@ function enableStopwatch() {
     stopwatchResetBtn.disabled = false;
 }
 
-// Stoppuhr deaktivieren wenn keine Task aktiv
+// Stoppuhr deaktivieren wenn keine Task aktiv (ohne Task abzuschließen)
 function disableStopwatch() {
-    stopStopwatch();
+    // Nur Stoppuhr stoppen ohne Task abzuschließen
+    isStopwatchRunning = false;
+    clearInterval(stopwatchInterval);
+    stopwatchDisplay.classList.remove('running');
     stopwatchStartBtn.disabled = true;
     stopwatchStopBtn.disabled = true;
 }
@@ -1984,19 +2056,34 @@ function enterFocusMode() {
         : '';
     focusTaskCategory.textContent = category;
 
-    // Timer setzen
+    // Timer setzen - Übernimm bestehende Zeit von Haupt-Stoppuhr falls vorhanden
     focusTotalSeconds = task.time * 60;
-    focusRemainingSeconds = focusTotalSeconds;
-    focusStopwatchSeconds = 0;
+    focusRemainingSeconds = remainingSeconds > 0 ? remainingSeconds : focusTotalSeconds;
+    focusStopwatchSeconds = stopwatchSeconds > 0 ? stopwatchSeconds : 0;
 
     updateFocusTimerDisplay();
     updateFocusProgressRing();
     updateFocusStopwatchDisplay();
+    updateFocusCoffeeFill();
+
+    // Steam initial aus
+    if (focusSteam) focusSteam.classList.remove('active');
 
     focusModeOverlay.classList.add('active');
 }
 
 function exitFocusMode() {
+    // Stoppuhr-Sekunden zurück zur Haupt-Ansicht synchronisieren
+    if (focusStopwatchSeconds > 0) {
+        stopwatchSeconds = focusStopwatchSeconds;
+        updateStopwatchDisplay();
+    }
+    if (focusRemainingSeconds >= 0) {
+        remainingSeconds = focusRemainingSeconds;
+        updateTimerDisplay();
+        updateCoffeeFill();
+    }
+
     stopFocusTimer();
     stopFocusStopwatch();
     focusModeOverlay.classList.remove('active');
@@ -2015,6 +2102,12 @@ function updateFocusProgressRing() {
     focusProgressBar.style.strokeDashoffset = offset;
 }
 
+function updateFocusCoffeeFill() {
+    if (!focusCoffeeFill) return;
+    const fillPercentage = focusTotalSeconds > 0 ? (focusRemainingSeconds / focusTotalSeconds) * 100 : 100;
+    focusCoffeeFill.style.height = `${fillPercentage}%`;
+}
+
 function updateFocusStopwatchDisplay() {
     const hrs = Math.floor(focusStopwatchSeconds / 3600);
     const mins = Math.floor((focusStopwatchSeconds % 3600) / 60);
@@ -2028,15 +2121,20 @@ function startFocusTimer() {
 
     isFocusRunning = true;
 
+    // Steam aktivieren
+    if (focusSteam) focusSteam.classList.add('active');
+
     focusTimerInterval = setInterval(() => {
         if (focusRemainingSeconds > 0) {
             focusRemainingSeconds--;
             updateFocusTimerDisplay();
             updateFocusProgressRing();
+            updateFocusCoffeeFill();
         } else {
             // Timer abgelaufen
             clearInterval(focusTimerInterval);
             focusTimerInterval = null;
+            if (focusSteam) focusSteam.classList.remove('active');
         }
     }, 1000);
 
@@ -2048,6 +2146,9 @@ function startFocusTimer() {
 
 function pauseFocusTimer() {
     isFocusRunning = false;
+
+    // Steam deaktivieren
+    if (focusSteam) focusSteam.classList.remove('active');
 
     if (focusTimerInterval) {
         clearInterval(focusTimerInterval);

@@ -1,6 +1,6 @@
 # Mas0n1x Produktivitäts-Tracker
 
-Ein moderner, visueller Produktivitäts-Tracker mit Kaffeetassen-Timer, Kanban-Board und Gamification-System.
+Ein moderner, visueller Produktivitäts-Tracker mit Kaffeetassen-Timer, Kanban-Board, Fokus-Modus und Gamification-System.
 
 ![Dark Mode](https://img.shields.io/badge/Theme-Dark%20Mode-1a1a2e)
 ![Electron](https://img.shields.io/badge/Electron-39.2.7-47848F)
@@ -17,15 +17,42 @@ Ein moderner, visueller Produktivitäts-Tracker mit Kaffeetassen-Timer, Kanban-B
 
 ### Kaffeetassen-Timer
 - Visuelle Darstellung: Tasse leert sich während der Timer läuft
-- Dampf-Animation bei aktivem Timer
+- Realistische Dampf-Animation mit 8 Partikeln
 - Start/Pause/Reset Steuerung
 - Countdown-Timer für geschätzte Zeit
 - Stoppuhr für tatsächliche Arbeitszeit
+- **Automatische Kopplung**: Stoppuhr startet automatisch mit dem Timer
+- **Manuelle Beendigung**: Aufgabe wird erst bei Stopp der Stoppuhr abgeschlossen
+
+### Fokus-Modus
+- Ablenkungsfreier Vollbildmodus für konzentriertes Arbeiten
+- Premium-Kaffeetasse mit 3D-Effekten und Glanzreflexionen
+- Atmosphärische Dampf-Animation mit 8 Partikeln
+- Glass-Morphism Design mit Ambient-Lighting
+- Kreisförmiger Fortschrittsring mit Glow-Effekt
+- Eigene Timer-Steuerung (Start/Pause/Fertig)
+- Synchronisation mit Haupt-Timer
+- ESC zum schnellen Beenden
+
+### Projekt-Zeiterfassung
+- Eigene Projekte mit Namen und Farben erstellen
+- Aufgaben einem Projekt zuweisen
+- Automatische Zeiterfassung pro Projekt
+- Balkendiagramm zur Visualisierung der Zeitverteilung
+- Gesamtzeit pro Projekt einsehen
+
+### Subtasks
+- Aufgaben in kleinere Schritte unterteilen
+- Subtasks einzeln abhaken
+- Fortschrittsbalken zeigt Subtask-Status
+- Übersicht auf der Task-Card
 
 ### Task-Management
 - Titel, Beschreibung und geschätzte Zeit pro Aufgabe
 - 5 Kategorien: Arbeit, Privat, Lernen, Sport, Projekt
 - Farbige Labels (Dringend, Medium, Einfach, Feature, Bug)
+- Projekt-Zuweisung für Zeiterfassung
+- Subtasks für komplexe Aufgaben
 - Notizen-Feld für zusätzliche Informationen
 - Automatisches Speichern im LocalStorage
 - Tagesstatistik (erledigte Aufgaben & Gesamtzeit)
@@ -107,14 +134,17 @@ ProductivityTracker/
 
 1. **Aufgabe erstellen**: Im Backlog Titel + Zeit + Kategorie eingeben
 2. **Aufgabe starten**: Task nach "In Arbeit" ziehen
-3. **Timer starten**: Start-Button klicken (Countdown + Stoppuhr)
-4. **Fertig**: Task wird automatisch nach "Erledigt" verschoben
-5. **XP sammeln**: Für jede erledigte Aufgabe gibt es XP basierend auf der Zeit
+3. **Timer starten**: Start-Button klicken (Countdown + Stoppuhr starten automatisch zusammen)
+4. **Fokus-Modus**: 🎯 Button für ablenkungsfreies Arbeiten
+5. **Projekte**: 📁 Button für Projekt-Zeiterfassung
+6. **Subtasks**: Im Task-Modal Subtasks hinzufügen
+7. **Fertig**: Stoppuhr stoppen um Aufgabe abzuschließen (tatsächliche Zeit wird erfasst)
+8. **XP sammeln**: Für jede erledigte Aufgabe gibt es XP basierend auf der Zeit
 
 ## Tastenkürzel
 
-- `Enter` - Neue Aufgabe hinzufügen (im Input-Feld)
-- `Escape` - Modal schließen
+- `Enter` - Neue Aufgabe/Subtask/Projekt hinzufügen
+- `Escape` - Modal oder Fokus-Modus schließen
 
 ## Technologien
 

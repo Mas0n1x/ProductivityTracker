@@ -203,13 +203,47 @@
                 <h2 class="focus-task-title" id="focusTaskTitle">Keine Aufgabe ausgewählt</h2>
                 <span class="focus-task-category" id="focusTaskCategory"></span>
             </div>
-            <div class="focus-timer-display" id="focusTimerDisplay">00:00</div>
-            <div class="focus-progress-ring">
-                <svg viewBox="0 0 200 200">
-                    <circle class="focus-progress-bg" cx="100" cy="100" r="90"/>
-                    <circle class="focus-progress-bar" id="focusProgressBar" cx="100" cy="100" r="90"/>
-                </svg>
+
+            <div class="focus-main-content">
+                <!-- Kaffeetasse links -->
+                <div class="focus-cup-container">
+                    <div class="focus-steam" id="focusSteam">
+                        <div class="steam-particle"></div>
+                        <div class="steam-particle"></div>
+                        <div class="steam-particle"></div>
+                        <div class="steam-particle"></div>
+                        <div class="steam-particle"></div>
+                        <div class="steam-particle"></div>
+                        <div class="steam-particle"></div>
+                        <div class="steam-particle"></div>
+                    </div>
+                    <div class="focus-cup">
+                        <div class="focus-cup-body">
+                            <div class="focus-coffee-fill" id="focusCoffeeFill"></div>
+                        </div>
+                        <div class="focus-cup-handle"></div>
+                    </div>
+                    <div class="focus-saucer"></div>
+                </div>
+
+                <!-- Timer rechts -->
+                <div class="focus-timer-section">
+                    <div class="focus-timer-display" id="focusTimerDisplay">00:00</div>
+                    <div class="focus-progress-ring">
+                        <svg viewBox="0 0 200 200">
+                            <defs>
+                                <linearGradient id="focusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#22c55e"/>
+                                    <stop offset="100%" style="stop-color:#16a34a"/>
+                                </linearGradient>
+                            </defs>
+                            <circle class="focus-progress-bg" cx="100" cy="100" r="90"/>
+                            <circle class="focus-progress-bar" id="focusProgressBar" cx="100" cy="100" r="90"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
+
             <div class="focus-controls">
                 <button class="btn focus-btn" id="focusStartBtn">Start</button>
                 <button class="btn focus-btn" id="focusPauseBtn">Pause</button>
