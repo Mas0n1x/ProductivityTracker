@@ -81,16 +81,30 @@ Ein moderner, visueller Produktivitäts-Tracker mit Kaffeetassen-Timer, Kanban-B
   - Durchschnittliche Abweichung
   - Aufschlüsselung: Schneller / Pünktlich / Langsamer
 
-### Globale Notizen
-- Separater Notizen-Bereich unabhängig von Tasks
+### Notizen-Verwaltung
+- Mehrere Notizen erstellen und verwalten
+- Notizen-Liste mit Titel, Vorschau und Datum
+- Editor mit Titel und Inhalt
 - Automatisches Speichern beim Tippen
-- Export als Text-Datei
+- Einzelne Notizen exportieren (📤 Button)
+- Alle Notizen auf einmal exportieren
+- Notizen löschen
 
 ### Backup & Export
 - Komplettes Backup aller Daten als JSON
 - Tasks, Statistiken, Achievements, Notizen
 - Import von Backup-Dateien
 - Letzter Backup-Zeitstempel
+
+### Einstellungen
+- **Autostart** - App mit Windows starten
+- App-Version anzeigen
+- Alle Daten zurücksetzen (mit Sicherheitsabfrage)
+
+### System Tray
+- App minimiert in den System Tray
+- Doppelklick öffnet das Fenster
+- Rechtsklick-Menü zum Öffnen/Beenden
 
 ### Responsive Design
 - Optimiert für verschiedene Bildschirmgrößen
@@ -126,6 +140,7 @@ ProductivityTracker/
 ├── style.css       # Dark Mode Styling (Glass-Morphism Design)
 ├── script.js       # App-Logik (Timer, Drag&Drop, Gamification)
 ├── main.js         # Electron Hauptprozess
+├── preload.js      # Electron Preload für IPC-Kommunikation
 ├── logo.png        # App-Logo
 ├── package.json    # Projektconfig & Build-Settings
 └── dist/           # Build-Output (.exe)
@@ -138,9 +153,11 @@ ProductivityTracker/
 3. **Timer starten**: Start-Button klicken (Countdown + Stoppuhr starten automatisch zusammen)
 4. **Fokus-Modus**: 🎯 Button für ablenkungsfreies Arbeiten
 5. **Projekte**: 📁 Button für Projekt-Zeiterfassung
-6. **Subtasks**: Im Task-Modal Subtasks hinzufügen
-7. **Fertig**: Stoppuhr stoppen um Aufgabe abzuschließen (tatsächliche Zeit wird erfasst)
-8. **XP sammeln**: Für jede erledigte Aufgabe gibt es XP basierend auf der Zeit
+6. **Notizen**: 📝 Button für Notizen-Verwaltung
+7. **Subtasks**: Im Task-Modal Subtasks hinzufügen
+8. **Fertig**: Stoppuhr stoppen um Aufgabe abzuschließen (tatsächliche Zeit wird erfasst)
+9. **Einstellungen**: 📊 → ⚙️ Tab für Autostart und mehr
+10. **XP sammeln**: Für jede erledigte Aufgabe gibt es XP basierend auf der Zeit
 
 ## Tastenkürzel
 

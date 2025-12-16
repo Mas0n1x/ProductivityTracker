@@ -2068,10 +2068,109 @@ renderStatsPanel = function(tab = 'today') {
         html = renderHeatmap() + renderCategoryAnalysis() + renderEstimationAccuracy();
     } else if (tab === 'backup') {
         html = renderBackupSection();
+    } else if (tab === 'settings') {
+        html = renderSettingsSection();
     }
 
     statsTabContent.innerHTML = html;
+
+    // Settings Event Listeners nach dem Rendern hinzufügen
+    if (tab === 'settings') {
+        initSettingsListeners();
+    }
 };
+
+// Einstellungen rendern
+function renderSettingsSection() {
+    return `
+        <div class="stats-section">
+            <div class="stats-section-title">Einstellungen</div>
+            <div class="settings-list">
+                <div class="setting-item">
+                    <div class="setting-info">
+                        <span class="setting-label">Mit Windows starten</span>
+                        <span class="setting-description">App automatisch beim Systemstart öffnen</span>
+                    </div>
+                    <label class="setting-toggle">
+                        <input type="checkbox" id="autostartToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="stats-section">
+            <div class="stats-section-title">Über</div>
+            <div class="about-info">
+                <p><strong>Mas0n1x Produktivitäts-Tracker</strong></p>
+                <p class="app-version" id="appVersion">Version: Lade...</p>
+                <p class="about-description">Ein moderner Produktivitäts-Tracker mit Kaffeetassen-Timer, Kanban-Board und Gamification.</p>
+            </div>
+        </div>
+        <div class="stats-section danger-zone">
+            <div class="stats-section-title">Gefahrenzone</div>
+            <div class="settings-list">
+                <div class="setting-item danger">
+                    <div class="setting-info">
+                        <span class="setting-label">Alle Daten löschen</span>
+                        <span class="setting-description">Alle Tasks, Statistiken und Einstellungen zurücksetzen</span>
+                    </div>
+                    <button class="btn btn-danger" id="resetAllData">Zurücksetzen</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Settings Event Listeners initialisieren
+async function initSettingsListeners() {
+    const autostartToggle = document.getElementById('autostartToggle');
+    const appVersion = document.getElementById('appVersion');
+    const resetAllData = document.getElementById('resetAllData');
+
+    // Prüfen ob Electron API verfügbar ist
+    if (window.electronAPI) {
+        // Autostart Status laden
+        try {
+            const isAutostart = await window.electronAPI.getAutostart();
+            autostartToggle.checked = isAutostart;
+        } catch (e) {
+            console.log('Autostart nicht verfügbar');
+        }
+
+        // Autostart Toggle Event
+        autostartToggle.addEventListener('change', async () => {
+            try {
+                await window.electronAPI.setAutostart(autostartToggle.checked);
+            } catch (e) {
+                console.log('Autostart konnte nicht gesetzt werden');
+                autostartToggle.checked = !autostartToggle.checked;
+            }
+        });
+
+        // App Version anzeigen
+        try {
+            const version = await window.electronAPI.getAppVersion();
+            appVersion.textContent = `Version: ${version}`;
+        } catch (e) {
+            appVersion.textContent = 'Version: 1.0.0';
+        }
+    } else {
+        // Browser-Modus
+        autostartToggle.disabled = true;
+        autostartToggle.parentElement.title = 'Nur in der Desktop-App verfügbar';
+        appVersion.textContent = 'Version: 1.0.0 (Browser)';
+    }
+
+    // Reset All Data
+    resetAllData.addEventListener('click', () => {
+        if (confirm('Bist du sicher? Alle Daten werden unwiderruflich gelöscht!')) {
+            if (confirm('Wirklich ALLE Daten löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+    });
+}
 
 // Globale Funktionen verfügbar machen
 window.exportAllData = exportAllData;

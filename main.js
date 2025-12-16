@@ -1,5 +1,5 @@
 const electron = require('electron');
-const { app, BrowserWindow, Tray, Menu, nativeImage } = electron;
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain } = electron;
 const path = require('path');
 
 let mainWindow;
@@ -13,7 +13,8 @@ function createWindow() {
         minHeight: 600,
         webPreferences: {
             nodeIntegration: false,
-            contextIsolation: true
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js')
         },
         backgroundColor: '#0a0f0a',
         show: false,
@@ -104,4 +105,27 @@ app.on('activate', () => {
 // Vor dem Beenden aufräumen
 app.on('before-quit', () => {
     app.isQuitting = true;
+});
+
+// ========================================
+// AUTOSTART FUNKTIONALITÄT
+// ========================================
+
+// Autostart Status abfragen
+ipcMain.handle('get-autostart', () => {
+    return app.getLoginItemSettings().openAtLogin;
+});
+
+// Autostart setzen
+ipcMain.handle('set-autostart', (event, enable) => {
+    app.setLoginItemSettings({
+        openAtLogin: enable,
+        path: app.getPath('exe')
+    });
+    return app.getLoginItemSettings().openAtLogin;
+});
+
+// App-Version abfragen
+ipcMain.handle('get-app-version', () => {
+    return app.getVersion();
 });
