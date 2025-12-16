@@ -14,7 +14,8 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            backgroundThrottling: false  // Timer läuft auch minimiert weiter
         },
         backgroundColor: '#0a0f0a',
         show: false,
