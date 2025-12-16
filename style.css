@@ -991,11 +991,32 @@ body::before {
     border-radius: 20px;
     width: 90%;
     max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow:
         0 25px 80px rgba(0, 0, 0, 0.6),
         0 0 60px rgba(34, 197, 94, 0.1);
     border: 1px solid var(--border-glass);
     animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom Scrollbar für Modal */
+.modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+    background: rgba(34, 197, 94, 0.3);
+    border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 197, 94, 0.5);
 }
 
 .modal.modal-small {
@@ -3905,6 +3926,134 @@ body::before {
     height: 100%;
     background: var(--accent-primary);
     border-radius: 2px;
+}
+
+/* Card Subtasks Container (für "In Arbeit" Tasks) */
+.card-subtasks-container {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-glass);
+}
+
+.card-subtasks-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.card-subtasks-header .subtask-icon {
+    font-size: 0.85rem;
+}
+
+.card-subtasks-count {
+    margin-left: auto;
+    background: rgba(34, 197, 94, 0.15);
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    color: var(--accent-primary);
+}
+
+.card-subtasks-progress {
+    height: 3px;
+    background: var(--bg-secondary);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.card-subtasks-progress-fill {
+    height: 100%;
+    background: var(--accent-primary);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.card-subtasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card-subtask-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.card-subtask-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.card-subtask-item.completed .card-subtask-text {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.card-subtask-checkbox {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.card-subtask-checkbox input {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.card-subtask-checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-glass);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.card-subtask-checkbox input:checked + .card-subtask-checkmark {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.card-subtask-checkmark::after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.card-subtask-checkbox input:checked + .card-subtask-checkmark::after {
+    display: block;
+}
+
+.card-subtask-text {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+    transition: all 0.2s ease;
 }
 
 /* Task Card Project Tag */

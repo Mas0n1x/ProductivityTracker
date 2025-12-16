@@ -43,9 +43,10 @@ Ein moderner, visueller Produktivitäts-Tracker mit Kaffeetassen-Timer, Kanban-B
 
 ### Subtasks
 - Aufgaben in kleinere Schritte unterteilen
-- Subtasks einzeln abhaken
+- Subtasks werden erst bei "In Arbeit" sichtbar
+- Direkt auf der Task-Card abhaken mit Checkboxen
 - Fortschrittsbalken zeigt Subtask-Status
-- Übersicht auf der Task-Card
+- Erledigte Subtasks werden durchgestrichen
 
 ### Task-Management
 - Titel, Beschreibung und geschätzte Zeit pro Aufgabe

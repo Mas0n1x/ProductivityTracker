@@ -298,19 +298,38 @@ function createTaskCardHTML(task) {
         ? `<span class="task-project" style="border-left: 3px solid ${project.color}; padding-left: 6px;">${project.name}</span>`
         : '';
 
-    // Subtasks-Indikator
+    // Subtasks-Anzeige - NUR bei "In Arbeit" Tasks
     let subtasksHTML = '';
-    if (task.subtasks && task.subtasks.length > 0) {
+    if (task.status === 'inprogress' && task.subtasks && task.subtasks.length > 0) {
         const completedSubtasks = task.subtasks.filter(s => s.completed).length;
         const totalSubtasks = task.subtasks.length;
         const progressPercent = (completedSubtasks / totalSubtasks) * 100;
+
+        const subtaskListHTML = task.subtasks.map((subtask, index) => `
+            <div class="card-subtask-item ${subtask.completed ? 'completed' : ''}">
+                <label class="card-subtask-checkbox">
+                    <input type="checkbox"
+                           ${subtask.completed ? 'checked' : ''}
+                           onchange="toggleCardSubtask(${task.id}, ${index}, event)">
+                    <span class="card-subtask-checkmark"></span>
+                </label>
+                <span class="card-subtask-text">${subtask.text}</span>
+            </div>
+        `).join('');
+
         subtasksHTML = `
-            <div class="task-subtasks-indicator">
-                <span class="subtask-icon">☑</span>
-                <div class="task-subtasks-bar">
-                    <div class="task-subtasks-bar-fill" style="width: ${progressPercent}%"></div>
+            <div class="card-subtasks-container">
+                <div class="card-subtasks-header">
+                    <span class="subtask-icon">☑</span>
+                    <span>Subtasks</span>
+                    <span class="card-subtasks-count">${completedSubtasks}/${totalSubtasks}</span>
                 </div>
-                <span>${completedSubtasks}/${totalSubtasks}</span>
+                <div class="card-subtasks-progress">
+                    <div class="card-subtasks-progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+                <div class="card-subtasks-list">
+                    ${subtaskListHTML}
+                </div>
             </div>
         `;
     }
@@ -2020,6 +2039,21 @@ function deleteSubtask(index) {
     currentSubtasks.splice(index, 1);
     renderSubtasks();
 }
+
+// Subtask direkt auf der Task-Card togglen
+function toggleCardSubtask(taskId, subtaskIndex, event) {
+    event.stopPropagation(); // Verhindert Task-Auswahl beim Klicken
+
+    const task = tasks.find(t => t.id === taskId);
+    if (task && task.subtasks && task.subtasks[subtaskIndex]) {
+        task.subtasks[subtaskIndex].completed = !task.subtasks[subtaskIndex].completed;
+        saveTasks();
+        renderAllTasks();
+    }
+}
+
+// Global verfügbar machen
+window.toggleCardSubtask = toggleCardSubtask;
 
 addSubtaskBtn.addEventListener('click', addSubtask);
 
