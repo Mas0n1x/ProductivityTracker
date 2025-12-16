@@ -43,11 +43,26 @@ Ein moderner, visueller Produktivitäts-Tracker mit Kaffeetassen-Timer, Kanban-B
 - **Tagesziel** mit anpassbarem Minutenziel
 - Level-Up und Achievement-Benachrichtigungen
 
-### Statistiken
+### Statistiken & Analyse
 - Tagesübersicht: Aufgaben, Zeit, XP
-- Wochenübersicht
-- Zeit-Vergleich: Geschätzte vs. tatsächliche Zeit
-- Kategorie-Verteilung
+- Wochenübersicht mit Durchschnittswerten
+- **Produktivitäts-Heatmap** - Zeigt wann du am produktivsten bist (Tag/Stunde)
+- **Kategorie-Analyse** - Zeit pro Kategorie in der Woche
+- **Zeitschätzungs-Genauigkeit** - Wie gut schätzt du deine Zeiten?
+  - Genauigkeits-Prozent
+  - Durchschnittliche Abweichung
+  - Aufschlüsselung: Schneller / Pünktlich / Langsamer
+
+### Globale Notizen
+- Separater Notizen-Bereich unabhängig von Tasks
+- Automatisches Speichern beim Tippen
+- Export als Text-Datei
+
+### Backup & Export
+- Komplettes Backup aller Daten als JSON
+- Tasks, Statistiken, Achievements, Notizen
+- Import von Backup-Dateien
+- Letzter Backup-Zeitstempel
 
 ### Responsive Design
 - Optimiert für verschiedene Bildschirmgrößen

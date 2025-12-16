@@ -1179,8 +1179,489 @@ stopwatchStartBtn.addEventListener('click', startStopwatch);
 stopwatchStopBtn.addEventListener('click', stopStopwatch);
 stopwatchResetBtn.addEventListener('click', resetStopwatch);
 
+// ========================================
+// NOTES PANEL FUNKTIONALITÄT
+// ========================================
+
+const notesToggle = document.getElementById('notesToggle');
+const notesPanel = document.getElementById('notesPanel');
+const notesClose = document.getElementById('notesClose');
+const globalNotes = document.getElementById('globalNotes');
+const notesSaved = document.getElementById('notesSaved');
+const exportNotesBtn = document.getElementById('exportNotes');
+
+let notesTimeout = null;
+
+// Notes laden
+function loadNotes() {
+    const savedNotes = localStorage.getItem('globalNotes');
+    if (savedNotes) {
+        globalNotes.value = savedNotes;
+    }
+}
+
+// Notes speichern mit Debounce
+function saveNotes() {
+    clearTimeout(notesTimeout);
+    notesTimeout = setTimeout(() => {
+        localStorage.setItem('globalNotes', globalNotes.value);
+        notesSaved.classList.add('show');
+        setTimeout(() => notesSaved.classList.remove('show'), 2000);
+    }, 500);
+}
+
+// Notes Panel Events
+notesToggle.addEventListener('click', () => {
+    notesPanel.classList.add('active');
+    statsPanel.classList.remove('active');
+    achievementsPanel.classList.remove('active');
+});
+
+notesClose.addEventListener('click', () => {
+    notesPanel.classList.remove('active');
+});
+
+globalNotes.addEventListener('input', saveNotes);
+
+// Notes exportieren
+exportNotesBtn.addEventListener('click', () => {
+    const text = globalNotes.value;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `notizen_${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+// ========================================
+// PRODUKTIVITÄTS-HEATMAP
+// ========================================
+
+function getProductivityHeatmapData() {
+    const heatmap = {};
+    const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+    // Initialisiere Heatmap
+    days.forEach(day => {
+        heatmap[day] = {};
+        for (let h = 0; h < 24; h++) {
+            heatmap[day][h] = 0;
+        }
+    });
+
+    // Analysiere erledigte Tasks
+    playerData.completedTasks.forEach(task => {
+        if (task.completedAt) {
+            const date = new Date(task.completedAt);
+            const day = days[date.getDay()];
+            const hour = date.getHours();
+            const minutes = task.actualTime || task.estimatedTime || 0;
+            heatmap[day][hour] += minutes;
+        }
+    });
+
+    return heatmap;
+}
+
+function renderHeatmap() {
+    const heatmap = getProductivityHeatmapData();
+    const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+    // Finde Maximum für Skalierung
+    let maxMinutes = 0;
+    Object.values(heatmap).forEach(dayData => {
+        Object.values(dayData).forEach(minutes => {
+            if (minutes > maxMinutes) maxMinutes = minutes;
+        });
+    });
+
+    // Stunden-Labels (nur jede 3. Stunde anzeigen)
+    let hoursRow = '<div class="heatmap-day-label"></div>';
+    for (let h = 0; h < 24; h++) {
+        if (h % 3 === 0) {
+            hoursRow += `<div class="heatmap-hour-label">${h}</div>`;
+        } else {
+            hoursRow += `<div class="heatmap-hour-label"></div>`;
+        }
+    }
+
+    let gridHTML = hoursRow;
+
+    days.forEach(day => {
+        gridHTML += `<div class="heatmap-day-label">${day}</div>`;
+        for (let h = 0; h < 24; h++) {
+            const minutes = heatmap[day][h];
+            let level = 0;
+            if (maxMinutes > 0) {
+                const percent = minutes / maxMinutes;
+                if (percent > 0.8) level = 5;
+                else if (percent > 0.6) level = 4;
+                else if (percent > 0.4) level = 3;
+                else if (percent > 0.2) level = 2;
+                else if (percent > 0) level = 1;
+            }
+            gridHTML += `<div class="heatmap-cell level-${level}" title="${day} ${h}:00 - ${minutes} Min"></div>`;
+        }
+    });
+
+    return `
+        <div class="heatmap-container">
+            <div class="heatmap-title">🔥 Produktivitäts-Heatmap</div>
+            <div class="heatmap-grid">${gridHTML}</div>
+            <div class="heatmap-legend">
+                <span>Weniger</span>
+                <div class="heatmap-legend-cell level-0"></div>
+                <div class="heatmap-legend-cell level-1"></div>
+                <div class="heatmap-legend-cell level-2"></div>
+                <div class="heatmap-legend-cell level-3"></div>
+                <div class="heatmap-legend-cell level-4"></div>
+                <div class="heatmap-legend-cell level-5"></div>
+                <span>Mehr</span>
+            </div>
+        </div>
+    `;
+}
+
+// ========================================
+// KATEGORIE-ANALYSE
+// ========================================
+
+function getCategoryAnalysis() {
+    const categories = {};
+    const oneWeekAgo = new Date(Date.now() - 7 * 86400000);
+
+    playerData.completedTasks.forEach(task => {
+        if (task.completedAt && new Date(task.completedAt) >= oneWeekAgo) {
+            const cat = task.category || 'keine';
+            if (!categories[cat]) {
+                categories[cat] = { count: 0, minutes: 0 };
+            }
+            categories[cat].count++;
+            categories[cat].minutes += task.actualTime || task.estimatedTime || 0;
+        }
+    });
+
+    return categories;
+}
+
+function renderCategoryAnalysis() {
+    const analysis = getCategoryAnalysis();
+    const maxMinutes = Math.max(...Object.values(analysis).map(c => c.minutes), 1);
+
+    const catInfo = {
+        'arbeit': { icon: '💼', name: 'Arbeit' },
+        'privat': { icon: '🏠', name: 'Privat' },
+        'lernen': { icon: '📚', name: 'Lernen' },
+        'sport': { icon: '💪', name: 'Sport' },
+        'projekt': { icon: '🚀', name: 'Projekt' },
+        'keine': { icon: '📋', name: 'Ohne Kategorie' }
+    };
+
+    let html = '';
+    Object.entries(catInfo).forEach(([key, info]) => {
+        const data = analysis[key] || { count: 0, minutes: 0 };
+        const percent = maxMinutes > 0 ? (data.minutes / maxMinutes) * 100 : 0;
+        html += `
+            <div class="category-chart-item">
+                <span class="category-chart-icon">${info.icon}</span>
+                <div class="category-chart-info">
+                    <div class="category-chart-name">${info.name}</div>
+                    <div class="category-chart-bar">
+                        <div class="category-chart-fill" style="width: ${percent}%"></div>
+                    </div>
+                </div>
+                <span class="category-chart-value">${data.minutes}m</span>
+            </div>
+        `;
+    });
+
+    return `
+        <div class="category-analysis">
+            <div class="heatmap-title">📊 Zeit pro Kategorie (Woche)</div>
+            <div class="category-chart">${html}</div>
+        </div>
+    `;
+}
+
+// ========================================
+// ZEITSCHÄTZUNGS-GENAUIGKEIT
+// ========================================
+
+function getEstimationAccuracy() {
+    let faster = 0, onTime = 0, slower = 0;
+    let totalDiff = 0;
+    let count = 0;
+
+    playerData.completedTasks.forEach(task => {
+        if (task.actualTime && task.estimatedTime) {
+            const diff = task.actualTime - task.estimatedTime;
+            const diffPercent = Math.abs(diff) / task.estimatedTime;
+
+            if (diffPercent <= 0.1) {
+                onTime++;
+            } else if (diff < 0) {
+                faster++;
+            } else {
+                slower++;
+            }
+
+            totalDiff += diff;
+            count++;
+        }
+    });
+
+    const avgDiff = count > 0 ? Math.round(totalDiff / count) : 0;
+    const total = faster + onTime + slower;
+
+    return {
+        faster,
+        onTime,
+        slower,
+        total,
+        avgDiff,
+        accuracy: total > 0 ? Math.round((onTime / total) * 100) : 0
+    };
+}
+
+function renderEstimationAccuracy() {
+    const acc = getEstimationAccuracy();
+    const total = Math.max(acc.total, 1);
+
+    let accuracyClass = 'good';
+    if (acc.accuracy < 30) accuracyClass = 'bad';
+    else if (acc.accuracy < 60) accuracyClass = 'medium';
+
+    let avgDiffText = acc.avgDiff === 0 ? '±0' :
+                     acc.avgDiff > 0 ? `+${acc.avgDiff}` : `${acc.avgDiff}`;
+
+    return `
+        <div class="estimation-accuracy">
+            <div class="heatmap-title">⏱️ Zeitschätzungs-Genauigkeit</div>
+            <div class="accuracy-summary">
+                <div class="accuracy-stat">
+                    <span class="accuracy-value ${accuracyClass}">${acc.accuracy}%</span>
+                    <span class="accuracy-label">Genauigkeit</span>
+                </div>
+                <div class="accuracy-stat">
+                    <span class="accuracy-value">${avgDiffText}m</span>
+                    <span class="accuracy-label">Ø Abweichung</span>
+                </div>
+            </div>
+            <div class="accuracy-breakdown">
+                <div class="accuracy-row">
+                    <span class="accuracy-row-label">Schneller</span>
+                    <div class="accuracy-row-bar">
+                        <div class="accuracy-row-fill faster" style="width: ${(acc.faster / total) * 100}%"></div>
+                    </div>
+                    <span class="accuracy-row-value">${acc.faster}</span>
+                </div>
+                <div class="accuracy-row">
+                    <span class="accuracy-row-label">Pünktlich</span>
+                    <div class="accuracy-row-bar">
+                        <div class="accuracy-row-fill on-time" style="width: ${(acc.onTime / total) * 100}%"></div>
+                    </div>
+                    <span class="accuracy-row-value">${acc.onTime}</span>
+                </div>
+                <div class="accuracy-row">
+                    <span class="accuracy-row-label">Langsamer</span>
+                    <div class="accuracy-row-bar">
+                        <div class="accuracy-row-fill slower" style="width: ${(acc.slower / total) * 100}%"></div>
+                    </div>
+                    <span class="accuracy-row-value">${acc.slower}</span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ========================================
+// BACKUP / EXPORT FUNKTIONALITÄT
+// ========================================
+
+function exportAllData() {
+    const data = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        tasks: tasks,
+        playerData: playerData,
+        globalNotes: localStorage.getItem('globalNotes') || '',
+        productivityStats: {
+            completed: completedToday,
+            totalMinutes: totalMinutes,
+            date: localStorage.getItem('productivityDate')
+        }
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `produktivitaet_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Letzten Export speichern
+    localStorage.setItem('lastBackup', new Date().toISOString());
+}
+
+function importData(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+
+            if (!data.version || !data.tasks || !data.playerData) {
+                alert('Ungültiges Backup-Format!');
+                return;
+            }
+
+            if (confirm('Achtung: Alle aktuellen Daten werden überschrieben! Fortfahren?')) {
+                tasks = data.tasks;
+                playerData = { ...playerData, ...data.playerData };
+
+                if (data.globalNotes) {
+                    localStorage.setItem('globalNotes', data.globalNotes);
+                    globalNotes.value = data.globalNotes;
+                }
+
+                if (data.productivityStats) {
+                    completedToday = data.productivityStats.completed || 0;
+                    totalMinutes = data.productivityStats.totalMinutes || 0;
+                }
+
+                saveTasks();
+                savePlayerData();
+                saveStats();
+
+                renderAllTasks();
+                updateStats();
+                updateGamificationUI();
+                renderAchievements();
+                renderStatsPanel('backup');
+
+                alert('Backup erfolgreich importiert!');
+            }
+        } catch (err) {
+            alert('Fehler beim Importieren: ' + err.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function renderBackupSection() {
+    const lastBackup = localStorage.getItem('lastBackup');
+    const lastBackupText = lastBackup
+        ? `Letzter Export: ${new Date(lastBackup).toLocaleString('de-DE')}`
+        : 'Noch kein Backup erstellt';
+
+    return `
+        <div class="backup-section">
+            <div class="heatmap-title">💾 Backup & Export</div>
+            <div class="backup-buttons">
+                <button class="btn-backup btn-export" onclick="exportAllData()">
+                    📤 Exportieren
+                </button>
+                <button class="btn-backup btn-import" onclick="document.getElementById('importFileInput').click()">
+                    📥 Importieren
+                </button>
+                <input type="file" id="importFileInput" accept=".json" onchange="if(this.files[0]) importData(this.files[0])">
+            </div>
+            <div class="backup-info">
+                <p>Exportiere alle deine Daten (Tasks, Statistiken, Notizen, Achievements) als JSON-Datei.</p>
+                <div class="backup-last">${lastBackupText}</div>
+            </div>
+        </div>
+    `;
+}
+
+// ========================================
+// ERWEITERTE STATS PANEL RENDERING
+// ========================================
+
+// Originale renderStatsPanel Funktion überschreiben
+const originalRenderStatsPanel = renderStatsPanel;
+renderStatsPanel = function(tab = 'today') {
+    let html = '';
+
+    if (tab === 'today') {
+        html = `
+            <div class="stats-section">
+                <div class="stats-section-title">Heute</div>
+                <div class="stats-grid">
+                    <div class="stats-item">
+                        <span class="stats-value">${completedToday}</span>
+                        <span class="stats-label">Erledigt</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${totalMinutes}</span>
+                        <span class="stats-label">Minuten</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${playerData.streak}</span>
+                        <span class="stats-label">Tage Streak</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${playerData.level}</span>
+                        <span class="stats-label">Level</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-section">
+                <div class="stats-section-title">Kategorien heute</div>
+                <div class="category-stats">
+                    ${renderCategoryStats()}
+                </div>
+            </div>
+        `;
+    } else if (tab === 'week') {
+        const weekStats = getWeekStats();
+        html = `
+            <div class="stats-section">
+                <div class="stats-section-title">Diese Woche</div>
+                <div class="stats-grid">
+                    <div class="stats-item">
+                        <span class="stats-value">${weekStats.completed}</span>
+                        <span class="stats-label">Erledigt</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${weekStats.totalMinutes}</span>
+                        <span class="stats-label">Minuten</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${Math.round(weekStats.completed / 7 * 10) / 10}</span>
+                        <span class="stats-label">Ø pro Tag</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${playerData.completedTasks.length}</span>
+                        <span class="stats-label">Gesamt</span>
+                    </div>
+                </div>
+            </div>
+            ${renderTimeComparison() ? `
+            <div class="stats-section">
+                <div class="stats-section-title">Zeit-Vergleich (letzte 10 Tasks)</div>
+                ${renderTimeComparison()}
+            </div>
+            ` : ''}
+        `;
+    } else if (tab === 'analyse') {
+        html = renderHeatmap() + renderCategoryAnalysis() + renderEstimationAccuracy();
+    } else if (tab === 'backup') {
+        html = renderBackupSection();
+    }
+
+    statsTabContent.innerHTML = html;
+};
+
+// Globale Funktionen verfügbar machen
+window.exportAllData = exportAllData;
+window.importData = importData;
+
 // Initial laden
 loadData();
+loadNotes();
 updateTimerDisplay();
 updateCoffeeFill();
 updateStopwatchDisplay();

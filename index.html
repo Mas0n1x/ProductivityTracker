@@ -147,7 +147,8 @@
             <div class="stats-tabs">
                 <button class="stats-tab active" data-tab="today">Heute</button>
                 <button class="stats-tab" data-tab="week">Woche</button>
-                <button class="stats-tab" data-tab="compare">Vergleich</button>
+                <button class="stats-tab" data-tab="analyse">Analyse</button>
+                <button class="stats-tab" data-tab="backup">Backup</button>
             </div>
             <div class="stats-tab-content" id="statsTabContent">
                 <!-- Dynamisch gefüllt -->
@@ -186,9 +187,28 @@
 
     <!-- Floating Buttons -->
     <div class="floating-buttons">
+        <button class="notes-toggle" id="notesToggle" title="Notizen">📝</button>
         <button class="achievements-toggle" id="achievementsToggle" title="Achievements">🏆</button>
         <button class="stats-toggle" id="statsToggle" title="Statistiken">📊</button>
     </div>
+
+    <!-- Notes Panel -->
+    <div class="notes-panel" id="notesPanel">
+        <div class="notes-header">
+            <h3>📝 Notizen</h3>
+            <button class="notes-close" id="notesClose">&times;</button>
+        </div>
+        <div class="notes-content">
+            <textarea id="globalNotes" class="global-notes-textarea" placeholder="Deine Notizen hier..."></textarea>
+        </div>
+        <div class="notes-footer">
+            <span class="notes-saved" id="notesSaved">Gespeichert</span>
+            <button class="btn btn-export-notes" id="exportNotes">Export</button>
+        </div>
+    </div>
+
+    <!-- Backup Panel (inside Stats) -->
+    <!-- Will be added as a tab in stats -->
 
     <!-- Task Modal -->
     <div class="modal-overlay" id="taskModal">
