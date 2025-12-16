@@ -998,6 +998,10 @@ body::before {
     animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.modal.modal-small {
+    max-width: 320px;
+}
+
 @keyframes slideUp {
     from {
         opacity: 0;
@@ -1292,6 +1296,8 @@ body::before {
     padding: 12px 35px;
     background: var(--bg-glass);
     border-bottom: 1px solid var(--border-glass);
+    position: relative;
+    z-index: 50;
 }
 
 .daily-goal-header {

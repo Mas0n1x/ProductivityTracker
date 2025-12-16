@@ -45,6 +45,12 @@ const achievementName = document.getElementById('achievementName');
 const levelupNotification = document.getElementById('levelupNotification');
 const levelupLevel = document.getElementById('levelupLevel');
 
+// Goal Modal Elemente
+const goalModal = document.getElementById('goalModal');
+const goalModalClose = document.getElementById('goalModalClose');
+const goalModalInput = document.getElementById('goalModalInput');
+const goalModalSave = document.getElementById('goalModalSave');
+
 // Kanban Spalten
 const columns = {
     backlog: document.getElementById('backlog-tasks'),
@@ -1064,11 +1070,34 @@ achievementsClose.addEventListener('click', () => {
 
 // Daily Goal bearbeiten
 editDailyGoal.addEventListener('click', () => {
-    const newGoal = prompt('Neues Tagesziel in Minuten:', playerData.dailyGoal);
-    if (newGoal && !isNaN(parseInt(newGoal))) {
-        playerData.dailyGoal = parseInt(newGoal);
+    goalModalInput.value = playerData.dailyGoal;
+    goalModal.classList.add('active');
+    goalModalInput.focus();
+});
+
+goalModalClose.addEventListener('click', () => {
+    goalModal.classList.remove('active');
+});
+
+goalModal.addEventListener('click', (e) => {
+    if (e.target === goalModal) {
+        goalModal.classList.remove('active');
+    }
+});
+
+goalModalSave.addEventListener('click', () => {
+    const newGoal = parseInt(goalModalInput.value);
+    if (newGoal && !isNaN(newGoal) && newGoal > 0) {
+        playerData.dailyGoal = newGoal;
         savePlayerData();
         updateGamificationUI();
+        goalModal.classList.remove('active');
+    }
+});
+
+goalModalInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        goalModalSave.click();
     }
 });
 

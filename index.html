@@ -210,6 +210,23 @@
     <!-- Backup Panel (inside Stats) -->
     <!-- Will be added as a tab in stats -->
 
+    <!-- Daily Goal Modal -->
+    <div class="modal-overlay" id="goalModal">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h3>Tagesziel anpassen</h3>
+                <button class="modal-close" id="goalModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label>Neues Tagesziel (Minuten)</label>
+                <input type="number" id="goalModalInput" class="modal-input" min="1" max="480" placeholder="z.B. 120">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-save" id="goalModalSave">Speichern</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Task Modal -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal">
