@@ -13,11 +13,37 @@
                 <img src="logo.png" alt="Mas0n1x" class="header-logo">
                 <h1>Mas0n1x Produktivitäts-Tracker</h1>
             </div>
+            <div class="header-gamification">
+                <div class="level-badge" id="levelBadge" title="Dein Level">
+                    <span class="level-icon">⚡</span>
+                    <span class="level-number" id="levelNumber">1</span>
+                </div>
+                <div class="xp-bar-container" title="XP Fortschritt">
+                    <div class="xp-bar" id="xpBar"></div>
+                    <span class="xp-text" id="xpText">0 / 100 XP</span>
+                </div>
+                <div class="streak-badge" id="streakBadge" title="Tage-Streak">
+                    <span class="streak-icon">🔥</span>
+                    <span class="streak-count" id="streakCount">0</span>
+                </div>
+            </div>
             <div class="header-stats">
                 <span>Erledigt heute: <strong id="completedCount">0</strong></span>
                 <span>Gesamtzeit: <strong id="totalTime">0</strong> Min</span>
             </div>
         </header>
+
+        <!-- Daily Goal Bar -->
+        <div class="daily-goal-section">
+            <div class="daily-goal-header">
+                <span class="daily-goal-label">Tagesziel</span>
+                <span class="daily-goal-value" id="dailyGoalValue">0 / 120 Min</span>
+                <button class="daily-goal-edit" id="editDailyGoal" title="Ziel anpassen">⚙</button>
+            </div>
+            <div class="daily-goal-bar">
+                <div class="daily-goal-progress" id="dailyGoalProgress"></div>
+            </div>
+        </div>
 
         <div class="main-layout">
             <!-- Kanban Board -->
@@ -32,6 +58,14 @@
                     <div class="add-task-form">
                         <input type="text" class="task-input" placeholder="Neue Aufgabe..." data-column="backlog">
                         <input type="number" class="time-input" placeholder="Min" min="1" max="120" data-column="backlog">
+                        <select class="category-select" data-column="backlog">
+                            <option value="">Kategorie</option>
+                            <option value="arbeit">💼 Arbeit</option>
+                            <option value="privat">🏠 Privat</option>
+                            <option value="lernen">📚 Lernen</option>
+                            <option value="sport">💪 Sport</option>
+                            <option value="projekt">🚀 Projekt</option>
+                        </select>
                         <button class="btn-add-task" data-column="backlog">+</button>
                     </div>
                 </div>
@@ -103,6 +137,59 @@
         </footer>
     </div>
 
+    <!-- Stats Panel (Toggle) -->
+    <div class="stats-panel" id="statsPanel">
+        <div class="stats-panel-header">
+            <h3>📊 Statistiken</h3>
+            <button class="stats-close" id="statsClose">&times;</button>
+        </div>
+        <div class="stats-content">
+            <div class="stats-tabs">
+                <button class="stats-tab active" data-tab="today">Heute</button>
+                <button class="stats-tab" data-tab="week">Woche</button>
+                <button class="stats-tab" data-tab="compare">Vergleich</button>
+            </div>
+            <div class="stats-tab-content" id="statsTabContent">
+                <!-- Dynamisch gefüllt -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Panel -->
+    <div class="achievements-panel" id="achievementsPanel">
+        <div class="achievements-header">
+            <h3>🏆 Achievements</h3>
+            <button class="achievements-close" id="achievementsClose">&times;</button>
+        </div>
+        <div class="achievements-grid" id="achievementsGrid">
+            <!-- Dynamisch gefüllt -->
+        </div>
+    </div>
+
+    <!-- Achievement Unlock Notification -->
+    <div class="achievement-notification" id="achievementNotification">
+        <div class="achievement-icon" id="achievementIcon">🏆</div>
+        <div class="achievement-info">
+            <span class="achievement-label">Achievement freigeschaltet!</span>
+            <span class="achievement-name" id="achievementName">Name</span>
+        </div>
+    </div>
+
+    <!-- Level Up Notification -->
+    <div class="levelup-notification" id="levelupNotification">
+        <div class="levelup-icon">⚡</div>
+        <div class="levelup-info">
+            <span class="levelup-label">Level Up!</span>
+            <span class="levelup-level" id="levelupLevel">Level 2</span>
+        </div>
+    </div>
+
+    <!-- Stats Toggle Button -->
+    <button class="stats-toggle" id="statsToggle" title="Statistiken">📊</button>
+
+    <!-- Achievements Toggle Button -->
+    <button class="achievements-toggle" id="achievementsToggle" title="Achievements">🏆</button>
+
     <!-- Task Modal -->
     <div class="modal-overlay" id="taskModal">
         <div class="modal">
@@ -117,6 +204,15 @@
                 <textarea id="modalTaskDesc" class="modal-textarea" placeholder="Beschreibung hinzufügen..."></textarea>
                 <label>Zeit (Minuten)</label>
                 <input type="number" id="modalTaskTime" class="modal-input" min="1" max="120">
+                <label>Kategorie</label>
+                <select id="modalTaskCategory" class="modal-select">
+                    <option value="">Keine Kategorie</option>
+                    <option value="arbeit">💼 Arbeit</option>
+                    <option value="privat">🏠 Privat</option>
+                    <option value="lernen">📚 Lernen</option>
+                    <option value="sport">💪 Sport</option>
+                    <option value="projekt">🚀 Projekt</option>
+                </select>
                 <label>Labels</label>
                 <div class="label-picker" id="labelPicker">
                     <span class="label-option" data-color="#f44336">Dringend</span>
@@ -125,6 +221,8 @@
                     <span class="label-option" data-color="#2196F3">Feature</span>
                     <span class="label-option" data-color="#9c27b0">Bug</span>
                 </div>
+                <label>Notizen</label>
+                <textarea id="modalTaskNotes" class="modal-textarea modal-notes" placeholder="Notizen, Links, Details..."></textarea>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-delete-task" id="deleteTaskBtn">Löschen</button>

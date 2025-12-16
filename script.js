@@ -16,9 +16,34 @@ const modalClose = document.getElementById('modalClose');
 const modalTaskTitle = document.getElementById('modalTaskTitle');
 const modalTaskDesc = document.getElementById('modalTaskDesc');
 const modalTaskTime = document.getElementById('modalTaskTime');
+const modalTaskCategory = document.getElementById('modalTaskCategory');
+const modalTaskNotes = document.getElementById('modalTaskNotes');
 const labelPicker = document.getElementById('labelPicker');
 const deleteTaskBtn = document.getElementById('deleteTaskBtn');
 const saveTaskBtn = document.getElementById('saveTaskBtn');
+
+// Gamification DOM Elemente
+const levelNumber = document.getElementById('levelNumber');
+const xpBar = document.getElementById('xpBar');
+const xpText = document.getElementById('xpText');
+const streakCount = document.getElementById('streakCount');
+const streakBadge = document.getElementById('streakBadge');
+const dailyGoalProgress = document.getElementById('dailyGoalProgress');
+const dailyGoalValue = document.getElementById('dailyGoalValue');
+const editDailyGoal = document.getElementById('editDailyGoal');
+const statsToggle = document.getElementById('statsToggle');
+const statsPanel = document.getElementById('statsPanel');
+const statsClose = document.getElementById('statsClose');
+const statsTabContent = document.getElementById('statsTabContent');
+const achievementsToggle = document.getElementById('achievementsToggle');
+const achievementsPanel = document.getElementById('achievementsPanel');
+const achievementsClose = document.getElementById('achievementsClose');
+const achievementsGrid = document.getElementById('achievementsGrid');
+const achievementNotification = document.getElementById('achievementNotification');
+const achievementIcon = document.getElementById('achievementIcon');
+const achievementName = document.getElementById('achievementName');
+const levelupNotification = document.getElementById('levelupNotification');
+const levelupLevel = document.getElementById('levelupLevel');
 
 // Kanban Spalten
 const columns = {
@@ -40,6 +65,19 @@ let editingTaskId = null;
 let completedToday = 0;
 let totalMinutes = 0;
 
+// Gamification Variablen
+let playerData = {
+    level: 1,
+    xp: 0,
+    totalXp: 0,
+    streak: 0,
+    lastActiveDate: null,
+    dailyGoal: 120,
+    achievements: [],
+    weeklyStats: {},
+    completedTasks: []
+};
+
 // Labels Konfiguration
 const labelConfig = {
     '#f44336': 'Dringend',
@@ -49,16 +87,58 @@ const labelConfig = {
     '#9c27b0': 'Bug'
 };
 
+// Kategorie Konfiguration
+const categoryConfig = {
+    'arbeit': { icon: '💼', name: 'Arbeit' },
+    'privat': { icon: '🏠', name: 'Privat' },
+    'lernen': { icon: '📚', name: 'Lernen' },
+    'sport': { icon: '💪', name: 'Sport' },
+    'projekt': { icon: '🚀', name: 'Projekt' }
+};
+
+// Achievements Definition
+const achievementsList = [
+    { id: 'first_task', name: 'Erste Schritte', desc: 'Erste Aufgabe erledigt', icon: '🎯', condition: (data) => data.completedTasks.length >= 1 },
+    { id: 'five_tasks', name: 'Produktiv', desc: '5 Aufgaben erledigt', icon: '⭐', condition: (data) => data.completedTasks.length >= 5 },
+    { id: 'ten_tasks', name: 'Fleißig', desc: '10 Aufgaben erledigt', icon: '🌟', condition: (data) => data.completedTasks.length >= 10 },
+    { id: 'twentyfive_tasks', name: 'Taskmaster', desc: '25 Aufgaben erledigt', icon: '💫', condition: (data) => data.completedTasks.length >= 25 },
+    { id: 'fifty_tasks', name: 'Produktivitäts-König', desc: '50 Aufgaben erledigt', icon: '👑', condition: (data) => data.completedTasks.length >= 50 },
+    { id: 'streak_3', name: 'Durchhalter', desc: '3 Tage Streak', icon: '🔥', condition: (data) => data.streak >= 3 },
+    { id: 'streak_7', name: 'Wochenkrieger', desc: '7 Tage Streak', icon: '🔥🔥', condition: (data) => data.streak >= 7 },
+    { id: 'streak_14', name: 'Unstoppbar', desc: '14 Tage Streak', icon: '💪', condition: (data) => data.streak >= 14 },
+    { id: 'streak_30', name: 'Legende', desc: '30 Tage Streak', icon: '🏆', condition: (data) => data.streak >= 30 },
+    { id: 'level_5', name: 'Aufsteiger', desc: 'Level 5 erreicht', icon: '⚡', condition: (data) => data.level >= 5 },
+    { id: 'level_10', name: 'Veteran', desc: 'Level 10 erreicht', icon: '⚡⚡', condition: (data) => data.level >= 10 },
+    { id: 'daily_goal', name: 'Tagesziel', desc: 'Tagesziel erreicht', icon: '🎯', condition: (data) => totalMinutes >= data.dailyGoal },
+    { id: 'speed_demon', name: 'Speedrunner', desc: 'Task 20% schneller erledigt', icon: '⚡', condition: () => false }, // Special check
+    { id: 'night_owl', name: 'Nachteule', desc: 'Task nach 22 Uhr erledigt', icon: '🦉', condition: () => new Date().getHours() >= 22 },
+    { id: 'early_bird', name: 'Frühaufsteher', desc: 'Task vor 7 Uhr erledigt', icon: '🐦', condition: () => new Date().getHours() < 7 },
+    { id: 'category_master', name: 'Allrounder', desc: 'Tasks in allen Kategorien', icon: '🎨', condition: (data) => {
+        const cats = new Set(data.completedTasks.map(t => t.category).filter(c => c));
+        return cats.size >= 5;
+    }}
+];
+
+// XP pro Level berechnen
+function getXpForLevel(level) {
+    return Math.floor(100 * Math.pow(1.5, level - 1));
+}
+
 // Daten aus LocalStorage laden
 function loadData() {
     const savedTasks = localStorage.getItem('kanbanTasks');
     const savedStats = localStorage.getItem('productivityStats');
     const savedDate = localStorage.getItem('productivityDate');
+    const savedPlayerData = localStorage.getItem('playerData');
 
     const today = new Date().toDateString();
 
     if (savedTasks) {
         tasks = JSON.parse(savedTasks);
+    }
+
+    if (savedPlayerData) {
+        playerData = { ...playerData, ...JSON.parse(savedPlayerData) };
     }
 
     if (savedStats && savedDate === today) {
@@ -72,8 +152,34 @@ function loadData() {
         saveStats();
     }
 
+    // Streak überprüfen
+    checkStreak();
+
     renderAllTasks();
     updateStats();
+    updateGamificationUI();
+    renderAchievements();
+}
+
+// Player Data speichern
+function savePlayerData() {
+    localStorage.setItem('playerData', JSON.stringify(playerData));
+}
+
+// Streak prüfen
+function checkStreak() {
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+    if (playerData.lastActiveDate === today) {
+        // Heute schon aktiv, nichts tun
+    } else if (playerData.lastActiveDate === yesterday) {
+        // Gestern aktiv, Streak weiterführen (wird bei Task-Abschluss erhöht)
+    } else if (playerData.lastActiveDate && playerData.lastActiveDate !== today) {
+        // Mehr als ein Tag vergangen, Streak zurücksetzen
+        playerData.streak = 0;
+        savePlayerData();
+    }
 }
 
 // Daten speichern
@@ -90,15 +196,19 @@ function saveStats() {
 }
 
 // Task erstellen
-function createTask(title, time, status = 'backlog') {
+function createTask(title, time, status = 'backlog', category = '') {
     const task = {
         id: Date.now(),
         title: title,
         description: '',
+        notes: '',
         time: time || 25,
+        actualTime: null,
         status: status,
+        category: category,
         labels: [],
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        completedAt: null
     };
 
     tasks.push(task);
@@ -113,6 +223,24 @@ function createTaskCardHTML(task) {
         `<span class="task-label" style="background: ${color}">${labelConfig[color] || ''}</span>`
     ).join('');
 
+    const categoryHTML = task.category && categoryConfig[task.category]
+        ? `<span class="task-category">${categoryConfig[task.category].icon} ${categoryConfig[task.category].name}</span>`
+        : '';
+
+    // Zeit-Vergleich für erledigte Tasks
+    let timeComparisonHTML = '';
+    if (task.status === 'done' && task.actualTime !== null) {
+        const diff = task.actualTime - task.time;
+        const diffClass = diff < 0 ? 'faster' : (diff > 0 ? 'slower' : '');
+        const diffText = diff < 0 ? `${Math.abs(diff)} Min schneller` : (diff > 0 ? `${diff} Min länger` : 'Perfekt!');
+        timeComparisonHTML = `
+            <div class="time-comparison">
+                <span class="time-estimated">Geplant: ${task.time}m</span>
+                <span class="time-actual ${diffClass}">Tatsächlich: ${task.actualTime}m (${diffText})</span>
+            </div>
+        `;
+    }
+
     return `
         <div class="task-card ${task.id === activeTaskId ? 'selected' : ''}"
              draggable="true"
@@ -123,9 +251,13 @@ function createTaskCardHTML(task) {
             </div>
             ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
             <div class="task-footer">
-                <div class="task-labels">${labelsHTML}</div>
+                <div class="task-labels">
+                    ${categoryHTML}
+                    ${labelsHTML}
+                </div>
                 <span class="task-time">${task.time} Min</span>
             </div>
+            ${timeComparisonHTML}
         </div>
     `;
 }
@@ -297,16 +429,359 @@ function completeTask() {
     const task = tasks.find(t => t.id === activeTaskId);
     if (task) {
         task.status = 'done';
+        task.completedAt = new Date().toISOString();
+
+        // Tatsächliche Zeit speichern (von Stoppuhr)
+        const actualMinutes = Math.ceil(stopwatchSeconds / 60);
+        task.actualTime = actualMinutes > 0 ? actualMinutes : task.time;
+
         completedToday++;
         totalMinutes += task.time;
 
+        // XP vergeben
+        const xpEarned = calculateXP(task);
+        addXP(xpEarned);
+
+        // Streak aktualisieren
+        updateStreak();
+
+        // Task zu completedTasks hinzufügen
+        playerData.completedTasks.push({
+            id: task.id,
+            title: task.title,
+            category: task.category,
+            estimatedTime: task.time,
+            actualTime: task.actualTime,
+            completedAt: task.completedAt
+        });
+
+        // Wöchentliche Stats aktualisieren
+        updateWeeklyStats(task);
+
+        // Achievements prüfen
+        checkAchievements(task);
+
         saveTasks();
         saveStats();
+        savePlayerData();
         updateStats();
+        updateGamificationUI();
     }
 
     resetActiveTask();
     renderAllTasks();
+}
+
+// XP berechnen
+function calculateXP(task) {
+    let xp = 10; // Basis-XP
+    xp += Math.floor(task.time / 5); // +2 XP pro 10 Minuten
+
+    // Bonus für schnelleres Erledigen
+    if (task.actualTime && task.actualTime < task.time * 0.8) {
+        xp += 5; // Speed Bonus
+    }
+
+    return xp;
+}
+
+// XP hinzufügen
+function addXP(amount) {
+    playerData.xp += amount;
+    playerData.totalXp += amount;
+
+    // Level-Up prüfen
+    const xpNeeded = getXpForLevel(playerData.level);
+    while (playerData.xp >= xpNeeded) {
+        playerData.xp -= xpNeeded;
+        playerData.level++;
+        showLevelUp(playerData.level);
+    }
+
+    savePlayerData();
+    updateGamificationUI();
+}
+
+// Level-Up Anzeige
+function showLevelUp(level) {
+    levelupLevel.textContent = `Level ${level}`;
+    levelupNotification.classList.add('show');
+    playCompletionSound();
+
+    setTimeout(() => {
+        levelupNotification.classList.remove('show');
+    }, 3000);
+
+    // Level Achievements prüfen
+    checkAchievements();
+}
+
+// Streak aktualisieren
+function updateStreak() {
+    const today = new Date().toDateString();
+
+    if (playerData.lastActiveDate !== today) {
+        const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+        if (playerData.lastActiveDate === yesterday || !playerData.lastActiveDate) {
+            playerData.streak++;
+        } else {
+            playerData.streak = 1;
+        }
+
+        playerData.lastActiveDate = today;
+        savePlayerData();
+    }
+}
+
+// Wöchentliche Stats aktualisieren
+function updateWeeklyStats(task) {
+    const today = new Date().toISOString().split('T')[0];
+
+    if (!playerData.weeklyStats[today]) {
+        playerData.weeklyStats[today] = {
+            completed: 0,
+            totalMinutes: 0,
+            categories: {}
+        };
+    }
+
+    playerData.weeklyStats[today].completed++;
+    playerData.weeklyStats[today].totalMinutes += task.actualTime || task.time;
+
+    if (task.category) {
+        playerData.weeklyStats[today].categories[task.category] =
+            (playerData.weeklyStats[today].categories[task.category] || 0) + 1;
+    }
+
+    // Alte Stats entfernen (älter als 30 Tage)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
+    Object.keys(playerData.weeklyStats).forEach(date => {
+        if (date < thirtyDaysAgo) {
+            delete playerData.weeklyStats[date];
+        }
+    });
+}
+
+// Achievements prüfen
+function checkAchievements(task = null) {
+    achievementsList.forEach(achievement => {
+        if (!playerData.achievements.includes(achievement.id)) {
+            let unlocked = false;
+
+            // Spezial-Check für Speedrunner
+            if (achievement.id === 'speed_demon' && task) {
+                if (task.actualTime && task.actualTime < task.time * 0.8) {
+                    unlocked = true;
+                }
+            } else {
+                unlocked = achievement.condition(playerData);
+            }
+
+            if (unlocked) {
+                playerData.achievements.push(achievement.id);
+                showAchievementUnlock(achievement);
+                savePlayerData();
+                renderAchievements();
+            }
+        }
+    });
+}
+
+// Achievement Unlock anzeigen
+function showAchievementUnlock(achievement) {
+    achievementIcon.textContent = achievement.icon;
+    achievementName.textContent = achievement.name;
+    achievementNotification.classList.add('show');
+    playCompletionSound();
+
+    setTimeout(() => {
+        achievementNotification.classList.remove('show');
+    }, 4000);
+}
+
+// Gamification UI aktualisieren
+function updateGamificationUI() {
+    // Level
+    levelNumber.textContent = playerData.level;
+
+    // XP Bar
+    const xpNeeded = getXpForLevel(playerData.level);
+    const xpPercent = (playerData.xp / xpNeeded) * 100;
+    xpBar.style.width = `${xpPercent}%`;
+    xpText.textContent = `${playerData.xp} / ${xpNeeded} XP`;
+
+    // Streak
+    streakCount.textContent = playerData.streak;
+    if (playerData.streak > 0) {
+        streakBadge.classList.remove('inactive');
+    } else {
+        streakBadge.classList.add('inactive');
+    }
+
+    // Daily Goal
+    const goalPercent = Math.min((totalMinutes / playerData.dailyGoal) * 100, 100);
+    dailyGoalProgress.style.width = `${goalPercent}%`;
+    dailyGoalValue.textContent = `${totalMinutes} / ${playerData.dailyGoal} Min`;
+
+    if (totalMinutes >= playerData.dailyGoal) {
+        dailyGoalProgress.classList.add('complete');
+    } else {
+        dailyGoalProgress.classList.remove('complete');
+    }
+}
+
+// Achievements rendern
+function renderAchievements() {
+    achievementsGrid.innerHTML = achievementsList.map(achievement => {
+        const isUnlocked = playerData.achievements.includes(achievement.id);
+        return `
+            <div class="achievement-card ${isUnlocked ? 'unlocked' : 'locked'}">
+                <span class="achievement-card-icon">${achievement.icon}</span>
+                <span class="achievement-card-name">${achievement.name}</span>
+                <span class="achievement-card-desc">${achievement.desc}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// Stats Panel rendern
+function renderStatsPanel(tab = 'today') {
+    let html = '';
+
+    if (tab === 'today') {
+        html = `
+            <div class="stats-section">
+                <div class="stats-section-title">Heute</div>
+                <div class="stats-grid">
+                    <div class="stats-item">
+                        <span class="stats-value">${completedToday}</span>
+                        <span class="stats-label">Erledigt</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${totalMinutes}</span>
+                        <span class="stats-label">Minuten</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${playerData.streak}</span>
+                        <span class="stats-label">Tage Streak</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${playerData.level}</span>
+                        <span class="stats-label">Level</span>
+                    </div>
+                </div>
+            </div>
+            <div class="stats-section">
+                <div class="stats-section-title">Kategorien heute</div>
+                <div class="category-stats">
+                    ${renderCategoryStats()}
+                </div>
+            </div>
+        `;
+    } else if (tab === 'week') {
+        const weekStats = getWeekStats();
+        html = `
+            <div class="stats-section">
+                <div class="stats-section-title">Diese Woche</div>
+                <div class="stats-grid">
+                    <div class="stats-item">
+                        <span class="stats-value">${weekStats.completed}</span>
+                        <span class="stats-label">Erledigt</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${weekStats.totalMinutes}</span>
+                        <span class="stats-label">Minuten</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${Math.round(weekStats.completed / 7 * 10) / 10}</span>
+                        <span class="stats-label">Ø pro Tag</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-value">${playerData.completedTasks.length}</span>
+                        <span class="stats-label">Gesamt</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (tab === 'compare') {
+        html = `
+            <div class="stats-section">
+                <div class="stats-section-title">Zeit-Vergleich (letzte 10 Tasks)</div>
+                ${renderTimeComparison()}
+            </div>
+        `;
+    }
+
+    statsTabContent.innerHTML = html;
+}
+
+// Kategorie-Stats für heute
+function renderCategoryStats() {
+    const todayTasks = tasks.filter(t => t.status === 'done' &&
+        t.completedAt && new Date(t.completedAt).toDateString() === new Date().toDateString());
+
+    const catCounts = {};
+    todayTasks.forEach(t => {
+        if (t.category) {
+            catCounts[t.category] = (catCounts[t.category] || 0) + 1;
+        }
+    });
+
+    const maxCount = Math.max(...Object.values(catCounts), 1);
+
+    return Object.entries(categoryConfig).map(([key, config]) => {
+        const count = catCounts[key] || 0;
+        const percent = (count / maxCount) * 100;
+        return `
+            <div class="category-stat-item">
+                <span class="category-stat-icon">${config.icon}</span>
+                <div class="category-stat-bar">
+                    <div class="category-stat-fill" style="width: ${percent}%"></div>
+                </div>
+                <span class="category-stat-value">${count}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// Wochen-Stats berechnen
+function getWeekStats() {
+    const oneWeekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+    let completed = 0;
+    let totalMins = 0;
+
+    Object.entries(playerData.weeklyStats).forEach(([date, stats]) => {
+        if (date >= oneWeekAgo) {
+            completed += stats.completed;
+            totalMins += stats.totalMinutes;
+        }
+    });
+
+    return { completed, totalMinutes: totalMins };
+}
+
+// Zeit-Vergleich rendern
+function renderTimeComparison() {
+    const recentTasks = playerData.completedTasks.slice(-10).reverse();
+
+    if (recentTasks.length === 0) {
+        return '<p style="color: var(--text-secondary); text-align: center;">Noch keine erledigten Tasks</p>';
+    }
+
+    return recentTasks.map(task => {
+        const diff = (task.actualTime || task.estimatedTime) - task.estimatedTime;
+        const diffClass = diff < 0 ? 'faster' : (diff > 0 ? 'slower' : '');
+        return `
+            <div class="comparison-item">
+                <span class="comparison-task">${task.title.substring(0, 20)}${task.title.length > 20 ? '...' : ''}</span>
+                <div class="comparison-times">
+                    <span class="comparison-estimated">${task.estimatedTime}m</span>
+                    <span class="comparison-actual ${diffClass}">${task.actualTime || task.estimatedTime}m</span>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // Statistiken aktualisieren
@@ -444,6 +919,8 @@ function openEditModal(taskId, event) {
     modalTaskTitle.value = task.title;
     modalTaskDesc.value = task.description || '';
     modalTaskTime.value = task.time;
+    modalTaskCategory.value = task.category || '';
+    modalTaskNotes.value = task.notes || '';
 
     // Labels zurücksetzen und setzen
     document.querySelectorAll('.label-option').forEach(opt => {
@@ -470,6 +947,8 @@ function saveTask() {
     task.title = modalTaskTitle.value.trim() || task.title;
     task.description = modalTaskDesc.value.trim();
     task.time = parseInt(modalTaskTime.value) || task.time;
+    task.category = modalTaskCategory.value;
+    task.notes = modalTaskNotes.value.trim();
 
     // Labels sammeln
     task.labels = [];
@@ -537,17 +1016,60 @@ document.querySelectorAll('.btn-add-task').forEach(btn => {
         const column = btn.dataset.column;
         const taskInput = document.querySelector(`.task-input[data-column="${column}"]`);
         const timeInput = document.querySelector(`.time-input[data-column="${column}"]`);
+        const categorySelect = document.querySelector(`.category-select[data-column="${column}"]`);
 
         const title = taskInput.value.trim();
         const time = parseInt(timeInput.value) || 25;
+        const category = categorySelect ? categorySelect.value : '';
 
         if (title) {
-            createTask(title, time, column);
+            createTask(title, time, column, category);
             taskInput.value = '';
             timeInput.value = '';
+            if (categorySelect) categorySelect.value = '';
             taskInput.focus();
         }
     });
+});
+
+// Stats Panel Events
+statsToggle.addEventListener('click', () => {
+    statsPanel.classList.add('active');
+    achievementsPanel.classList.remove('active');
+    renderStatsPanel('today');
+});
+
+statsClose.addEventListener('click', () => {
+    statsPanel.classList.remove('active');
+});
+
+// Stats Tabs
+document.querySelectorAll('.stats-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.stats-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderStatsPanel(tab.dataset.tab);
+    });
+});
+
+// Achievements Panel Events
+achievementsToggle.addEventListener('click', () => {
+    achievementsPanel.classList.add('active');
+    statsPanel.classList.remove('active');
+});
+
+achievementsClose.addEventListener('click', () => {
+    achievementsPanel.classList.remove('active');
+});
+
+// Daily Goal bearbeiten
+editDailyGoal.addEventListener('click', () => {
+    const newGoal = prompt('Neues Tagesziel in Minuten:', playerData.dailyGoal);
+    if (newGoal && !isNaN(parseInt(newGoal))) {
+        playerData.dailyGoal = parseInt(newGoal);
+        savePlayerData();
+        updateGamificationUI();
+    }
 });
 
 // Enter-Taste für Input
