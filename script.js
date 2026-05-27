@@ -2572,3 +2572,143 @@ loadNotes();
 updateTimerDisplay();
 updateCoffeeFill();
 updateStopwatchDisplay();
+
+// ========================================
+// JARVIS-BRIDGE
+// ========================================
+// Spiegelt Tasks/Notes/Stats an den Main-Prozess, damit die lokale
+// HTTP-API (Port 7777) sie an Jarvis ausliefern kann. Mutationen, die
+// von Jarvis kommen (Task anlegen, Task abschließen), werden hier
+// ausgeführt und zurückgemeldet.
+
+function buildJarvisSnapshot() {
+    const safeNotes = (notes || []).map(n => ({
+        id: n.id,
+        title: n.title,
+        content: n.content,
+        createdAt: n.createdAt,
+        updatedAt: n.updatedAt
+    }));
+    const safeTasks = (tasks || []).map(t => ({
+        id: t.id,
+        title: t.title,
+        description: t.description || '',
+        notes: t.notes || '',
+        status: t.status,
+        category: t.category || '',
+        labels: t.labels || [],
+        time: t.time,
+        actualTime: t.actualTime,
+        projectId: t.projectId || null,
+        subtasks: t.subtasks || [],
+        createdAt: t.createdAt,
+        completedAt: t.completedAt || null
+    }));
+    return {
+        tasks: safeTasks,
+        notes: safeNotes,
+        stats: {
+            xp: playerData.xp,
+            level: playerData.level,
+            total_xp: playerData.totalXp,
+            streak: playerData.streak,
+            today_minutes: totalMinutes,
+            completed_today: completedToday,
+            daily_goal: playerData.dailyGoal,
+            achievements: playerData.achievements || []
+        }
+    };
+}
+
+let _jarvisPushTimer = null;
+function pushSnapshotToJarvis() {
+    if (!window.electronAPI || !window.electronAPI.pushSnapshot) return;
+    // Debounce — Saves feuern teils mehrfach hintereinander
+    clearTimeout(_jarvisPushTimer);
+    _jarvisPushTimer = setTimeout(() => {
+        try {
+            window.electronAPI.pushSnapshot(buildJarvisSnapshot());
+        } catch (e) {
+            console.warn('Jarvis snapshot push failed:', e);
+        }
+    }, 100);
+}
+
+// In bestehende Save-Funktionen einklinken, ohne deren Logik anzufassen
+if (window.electronAPI && window.electronAPI.pushSnapshot) {
+    const _origSaveTasks = saveTasks;
+    saveTasks = function () { _origSaveTasks.apply(this, arguments); pushSnapshotToJarvis(); };
+
+    const _origSaveStats = saveStats;
+    saveStats = function () { _origSaveStats.apply(this, arguments); pushSnapshotToJarvis(); };
+
+    const _origSavePlayerData = savePlayerData;
+    savePlayerData = function () { _origSavePlayerData.apply(this, arguments); pushSnapshotToJarvis(); };
+
+    const _origSaveAllNotes = saveAllNotes;
+    saveAllNotes = function () { _origSaveAllNotes.apply(this, arguments); pushSnapshotToJarvis(); };
+
+    // Initialer Push, sobald die Daten geladen sind
+    pushSnapshotToJarvis();
+
+    // Mutationen von Jarvis abarbeiten
+    window.electronAPI.onMutation(({ id, type, payload }) => {
+        try {
+            if (type === 'add-task') {
+                const task = createTask(
+                    payload.title,
+                    25,
+                    'backlog',
+                    payload.category || ''
+                );
+                if (payload.notes) {
+                    task.notes = payload.notes;
+                    saveTasks();
+                }
+                window.electronAPI.sendMutationResult(id, { id: task.id, task });
+            } else if (type === 'complete-task') {
+                const taskId = Number(payload.id);
+                const task = tasks.find(t => t.id === taskId || String(t.id) === String(payload.id));
+                if (!task) {
+                    window.electronAPI.sendMutationResult(id, null, `task ${payload.id} not found`);
+                    return;
+                }
+                if (task.status === 'done') {
+                    window.electronAPI.sendMutationResult(id, { id: task.id, already_done: true });
+                    return;
+                }
+                task.status = 'done';
+                task.completedAt = new Date().toISOString();
+                task.actualTime = task.actualTime || task.time;
+                completedToday++;
+                totalMinutes += task.time;
+                playerData.completedTasks = playerData.completedTasks || [];
+                playerData.completedTasks.push({
+                    id: task.id,
+                    title: task.title,
+                    category: task.category,
+                    estimatedTime: task.time,
+                    actualTime: task.actualTime,
+                    completedAt: task.completedAt
+                });
+                if (typeof calculateXP === 'function' && typeof addXP === 'function') {
+                    try { addXP(calculateXP(task)); } catch (_) { /* noop */ }
+                }
+                if (typeof updateStreak === 'function') { try { updateStreak(); } catch (_) {} }
+                if (typeof updateWeeklyStats === 'function') { try { updateWeeklyStats(task); } catch (_) {} }
+                if (typeof checkAchievements === 'function') { try { checkAchievements(task); } catch (_) {} }
+                saveTasks();
+                saveStats();
+                savePlayerData();
+                if (typeof renderAllTasks === 'function') renderAllTasks();
+                if (typeof updateStats === 'function') updateStats();
+                if (typeof updateGamificationUI === 'function') updateGamificationUI();
+                window.electronAPI.sendMutationResult(id, { id: task.id, completedAt: task.completedAt });
+            } else {
+                window.electronAPI.sendMutationResult(id, null, `unknown mutation type: ${type}`);
+            }
+        } catch (e) {
+            window.electronAPI.sendMutationResult(id, null, e.message || String(e));
+        }
+    });
+}

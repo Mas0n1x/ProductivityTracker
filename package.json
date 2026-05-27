@@ -12,7 +12,13 @@
     "type": "git",
     "url": "git+https://github.com/Mas0n1x/ProductivityTracker.git"
   },
-  "keywords": ["productivity", "timer", "kanban", "todo", "mas0n1x"],
+  "keywords": [
+    "productivity",
+    "timer",
+    "kanban",
+    "todo",
+    "mas0n1x"
+  ],
   "author": "Mas0n1x",
   "license": "MIT",
   "bugs": {
@@ -20,7 +26,7 @@
   },
   "homepage": "https://github.com/Mas0n1x/ProductivityTracker#readme",
   "devDependencies": {
-    "electron": "^39.2.7",
+    "electron": "^39.8.10",
     "electron-builder": "^26.0.12"
   },
   "build": {
@@ -38,7 +44,9 @@
       "target": [
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "logo.png",
